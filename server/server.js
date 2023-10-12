@@ -1,17 +1,21 @@
-const express = require('express');
-const cors = require('cors');
-const db = require("./db");
-require('dotenv').config();
-const app = express();
+const PORT = process.env.PORT ?? 8000
+const express = require('express')
+const cors = require('cors')
+const app = express()
+const pool = require('./db')
 
-app.use(cors());
-app.use(express.json());
+app.use(cors())
+// get all tasks
+app.get('/tasks/:user_id', async (req, res) => {
+    // console.log(req)
+    const {user_id} = req.params // TESTING 
+    // console.log(user_id)
+    try {
+        const tasks = await pool.query('SELECT * FROM tasks WHERE user_id = $1', [user_id])
+        res.json(tasks.rows)
+    } catch (err) {
+        console.error(err)
+    }
+})
 
-// app.post()
-// app.get()
-// app.put()
-
-const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT, ( )=> console.log(`Server running on PORT ${PORT}`)  )
