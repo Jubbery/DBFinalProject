@@ -1,3 +1,5 @@
+import Button from '@mui/material/Button';
+
 const ListHeader = ({ listName }) => {
     
     const signOut = () => {
@@ -8,8 +10,8 @@ const ListHeader = ({ listName }) => {
       <div className="list-header">
         <h1>{listName}</h1> 
             <div className="button-container">
-                <button className="create">ADD NEW</button>
-                <button className="signout" onClick={signOut}>SIGN OUT</button>
+                <Button variant="contained" className="create">ADD NEW</Button>
+                <Button variant="contained" className="signout" onClick={signOut}>SIGN OUT</Button>
             </div> 
       </div>
     );

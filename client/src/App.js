@@ -1,34 +1,30 @@
-import ListHeader from "./components/ListHeader";
-import ListItem from './components/ListItem'
-import { useEffect, useState } from 'react'
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import NavBar from "./components/NavBar";
+import Assignments from "./components/Assignments";
+import Calendar from "./components/Calendar";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const App = () => {
-  const user_id = 12345678 // TESTING hardcoded id
-  const [ myTasks, setTasks] = useState(null)
-
-  const getData = async () => {
-    try {
-      const response = await fetch(`http://localhost:8000/tasks/${user_id}`)
-      const json = await response.json()
-      setTasks(json)
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  useEffect(() => getData, [])
-  
-  console.log(myTasks)
-
-  // Sort tasks by date
-  const sortedTasks = myTasks?.sort((a,b) => new Date(a.date) - new Date(b.date))
-
   return (
-    <div className="app">
-      <ListHeader listName={'📚 Class Assignments List'}/>
-      {sortedTasks?.map((myTask) => <ListItem key={myTask.task_id} myTask={myTask}/>)}
-    </div>
+    <GoogleOAuthProvider clientId="<PUT_CLIENT_ID_HERE_FROM_SERVER>">
+      <Router>
+        <div className="navbar">
+          <NavBar />
+        </div>
+        <div className="app">
+          <div className="body">
+            <Routes>
+              {/* Example route, modify as needed */}
+              <Route path="/assignments" element={<Assignments />} />
+              <Route path="/calendar" element={<Calendar />} />
+              {/* Add other routes here */}
+            </Routes>
+          </div>
+        </div>
+      </Router>
+    </GoogleOAuthProvider>
   );
-}
+};
 
 export default App;

@@ -1,9 +1,5 @@
 const Auth = () => {
-    return (
-      <div>
-      </div>
-    );
-  }
-  
-  export default Auth;
-  
+  return <div></div>;
+};
+
+export default Auth;
