@@ -8,7 +8,7 @@ const Assignments = () => {
 
   const getData = async () => {
     try {
-      const response = await fetch(`http://localhost:5432/tasks/${user_id}`);
+      const response = await fetch(`http://localhost:8000/tasks/${user_id}`);
       const json = await response.json();
       setTasks(json);
     } catch (err) {
