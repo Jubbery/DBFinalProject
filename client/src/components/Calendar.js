@@ -1,46 +1,36 @@
-import React, { useState } from "react";
-import { GoogleLogin, googleLogout } from "@react-oauth/google";
+import React from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
 
-const CLIENT_ID =
-  "405252700885-lf8bd7hfov161j82ut4r0iqaauosopb7.apps.googleusercontent.com";
+// https://fullcalendar.io/docs/react
 
-export default function Calendar() {
-  const [canvasURL, setCanvasURL] = useState("");
-
-  const handleLoginSuccess = (credentialResponse) => {
-    console.log("Successfully logged in!", credentialResponse);
-    // Handle any further operations after successful login.
+export default class Calendar extends React.Component {
+  render() {
+    return (
+      <FullCalendar
+        plugins={[dayGridPlugin]}
+        initialView="dayGridMonth"
+        events={[
+          { title: "event 1", date: "2023-10-23" },
+          { title: "event 2", date: "2023-10-24" },
+        ]}
+        eventContent={renderEventContent}
+        eventClick={this.handleDateClick}
+        selectAllow="true"
+      />
+    );
+  }
+  handleDateClick = (arg) => {
+    // bind with an arrow function
+    console.log(arg.view.getCurrentData());
   };
+}
 
-  const handleLoginError = () => {
-    console.log("Login Failed");
-  };
-
-  const handleLogout = () => {
-    googleLogout();
-    // Handle any other operations needed on logout.
-  };
-
-  const handleURLChange = (e) => {
-    setCanvasURL(e.target.value);
-    // Handle fetching from Canvas URL and integrate it with Google Calendar if required.
-  };
-
+function renderEventContent(eventInfo) {
   return (
-    <div>
-      <GoogleLogin
-        clientId={CLIENT_ID}
-        onSuccess={handleLoginSuccess}
-        onError={handleLoginError}
-      />
-      <button onClick={handleLogout}>Logout</button>
-      <input
-        type="text"
-        placeholder="Paste Canvas URL"
-        value={canvasURL}
-        onChange={handleURLChange}
-      />
-      {/* Display fetched Canvas tasks or events */}
-    </div>
+    <>
+      <b>{eventInfo.timeText}</b>
+      <i>{eventInfo.event.title}</i>
+    </>
   );
 }
