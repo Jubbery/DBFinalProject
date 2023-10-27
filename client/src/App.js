@@ -4,8 +4,12 @@ import NavBar from "./components/NavBar";
 import Assignments from "./components/Assignments";
 import Calendar from "./components/Calendar";
 import FAQ from "./components/FAQ";
+import Signup from "./components/Signup";
 
 const App = () => {
+  // Hard coded for now
+  let signedIn = true;
+
   return (
     <Router>
       <div className="navbar">
@@ -15,6 +19,10 @@ const App = () => {
         <div className="body">
           <Routes>
             {/* Example route, modify as needed */}
+            <Route
+              path="/welcome"
+              element={signedIn ? <Signup /> : <Assignments />}
+            />
             <Route path="/assignments" element={<Assignments />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/faq" element={<FAQ />} />
