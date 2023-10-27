@@ -14,7 +14,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import AdbIcon from "@mui/icons-material/Adb";
+import SchemaIcon from "@mui/icons-material/Schema";
 
 const pages = ["Assignments", "Calendar", "FAQ"];
 const settings = ["Profile", "Account", "Dashboard", "Signin", "Logout"];
@@ -42,12 +42,12 @@ function NavBar() {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+          <SchemaIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
           <Typography
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="/welcome"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -58,7 +58,7 @@ function NavBar() {
               textDecoration: "none",
             }}
           >
-            LOGO
+            Canvas Flow
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -102,12 +102,12 @@ function NavBar() {
               ))}
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+          <SchemaIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
           <Typography
             variant="h5"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="/welcome"
             sx={{
               mr: 2,
               display: { xs: "flex", md: "none" },
@@ -119,7 +119,7 @@ function NavBar() {
               textDecoration: "none",
             }}
           >
-            LOGO
+            Canvas Flow
           </Typography>
           <Box
             sx={{

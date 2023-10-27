@@ -3,27 +3,34 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Assignments from "./components/Assignments";
 import Calendar from "./components/Calendar";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import FAQ from "./components/FAQ";
+import Signup from "./components/Signup";
 
 const App = () => {
+  // Hard coded for now
+  let signedIn = true;
+
   return (
-    <GoogleOAuthProvider clientId="<PUT_CLIENT_ID_HERE_FROM_SERVER>">
-      <Router>
-        <div className="navbar">
-          <NavBar />
+    <Router>
+      <div className="navbar">
+        <NavBar />
+      </div>
+      <div className="app">
+        <div className="body">
+          <Routes>
+            {/* Example route, modify as needed */}
+            <Route
+              path="/welcome"
+              element={signedIn ? <Signup /> : <Assignments />}
+            />
+            <Route path="/assignments" element={<Assignments />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/faq" element={<FAQ />} />
+            {/* Add other routes here */}
+          </Routes>
         </div>
-        <div className="app">
-          <div className="body">
-            <Routes>
-              {/* Example route, modify as needed */}
-              <Route path="/assignments" element={<Assignments />} />
-              <Route path="/calendar" element={<Calendar />} />
-              {/* Add other routes here */}
-            </Routes>
-          </div>
-        </div>
-      </Router>
-    </GoogleOAuthProvider>
+      </div>
+    </Router>
   );
 };
 
