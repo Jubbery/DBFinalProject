@@ -43,7 +43,7 @@ const Sidebar = ({ weekendsVisible, handleWeekendsToggle, currentEvents }) => (
       borderRadius: "5px",
       display: "flex",
       flexDirection: "column",
-      maxHeight: "calc(70vh - 100px)", // Adjust the height as needed
+      maxHeight: "calc(70vh - 100px)",
       overflow: "auto", // Makes the sidebar scrollable when content overflows
     }}
   >
@@ -68,7 +68,7 @@ const Sidebar = ({ weekendsVisible, handleWeekendsToggle, currentEvents }) => (
     <Box
       sx={{
         flex: "1", // Makes this box fill the remaining space
-        overflowY: "auto", // Makes the event list scrollable
+        overflowY: "auto", // Makes the event list scrollable (thank god)
       }}
     >
       <Typography variant="h6">All Events ({currentEvents.length})</Typography>

@@ -14,7 +14,6 @@ User.init(
       type: DataTypes.STRING,
       // allowNull defaults to true
     },
-    // ... other attributes ...
   },
   {
     // Other model options go here

@@ -1,4 +1,3 @@
-// ./server/config/dbConfig.js
 require("dotenv").config();
 
 const dbConfig = {

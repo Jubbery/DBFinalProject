@@ -136,9 +136,9 @@ const Calendar = () => {
             <Button
               onClick={handleFetchCanvasEvents}
               disabled={loading}
-              variant="contained" // This applies the solid background color
-              color="primary" // This ensures the button color matches your theme's primary color
-              sx={{ marginBottom: "10px" }} // You can use the sx prop to add custom styles
+              variant="contained"
+              color="primary"
+              sx={{ marginBottom: "10px" }}
             >
               Fetch Canvas Events
             </Button>

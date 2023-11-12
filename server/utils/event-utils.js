@@ -10,7 +10,7 @@ var eventGuid;
     typeof HTMLScriptElement !== "undefined" &&
     "noModule" in HTMLScriptElement.prototype
   ) {
-    // Until we use ES6 exports, using <script type="module"> we define ICAL on the window global.
+    // Using <script type="module"> define ICAL on the window global.
     window.eventGuid = eventGuid = {};
   } else if (typeof eventGuid !== "object") {
     eventGuid = {};

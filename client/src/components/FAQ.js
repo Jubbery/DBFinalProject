@@ -10,14 +10,14 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const CustomAccordion = styled(Accordion)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper, // Use theme colors for adaptability
+  backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
   margin: "1rem 0",
   "&:not(:last-child)": {},
 }));
 
 const CustomAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
-  backgroundColor: "#2F2F2F", // Or any color you want
+  backgroundColor: "#2F2F2F",
   color: theme.palette.secondary.contrastText,
   borderBottom: "5px solid #fff",
   "&:hover": {

@@ -6,7 +6,7 @@ const getEventByUid = async (uid) => {
 };
 
 const createOrUpdateEvent = async (eventData) => {
-  // Your logic to create or update an event
+  // Logic to create or update a Canvas event
 };
 
 module.exports = {

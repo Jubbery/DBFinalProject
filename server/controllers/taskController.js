@@ -17,7 +17,7 @@ const getAllTasksForUser = async (req, res) => {
 const orderTasksByDeadline = async (req, res) => {
   const { user_id } = req.params; // Extract the user_id from the request parameters
   try {
-    // Query the database for tasks associated with the user_id, ordered by the deadline
+    // Query table for tasks associated with the user_id, ordered by the deadline
     const tasks = await pool.query(
       "SELECT * FROM Tasks WHERE user_id = $1 ORDER BY deadline",
       [user_id]

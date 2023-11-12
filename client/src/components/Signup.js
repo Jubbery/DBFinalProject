@@ -42,7 +42,7 @@ function Signup() {
       if (!response.ok) {
         throw new Error("Signup failed");
       }
-      // Handle successful signup (e.g., redirect to login page)
+      // Handle successful signup (needs to redirect to login page)
     } catch (error) {
       setErrorMessage(error.message);
     }

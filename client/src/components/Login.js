@@ -19,7 +19,6 @@ export default function Login() {
       if (!response.ok) {
         throw new Error("Login failed");
       }
-      // Handle response data, store token, redirect user, etc.
     } catch (error) {
       setErrorMessage(error.message);
     }

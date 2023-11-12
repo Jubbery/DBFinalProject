@@ -8,10 +8,7 @@ import {
 } from "@mui/material";
 import DOMPurify from "dompurify";
 
-// EventItem and EventsList can be in separate files or the same file as Debug.js
-
 const StringDisplay = ({ text }) => {
-  // Replace newline characters with <br> tags
   const formattedText = text
     .replace(/\\n/g, "<br>") // Replace escaped newlines
     .replace(/\\;/g, ";") // Replace escaped semicolons
@@ -76,7 +73,7 @@ const mapEventToObject = (eventData) => {
     const key = detail[0];
     const value = detail[3];
 
-    // Map the iCalendar keys to our object's keys
+    // Map the iCalendar keys to object keys
     switch (key) {
       case "dtstamp":
         mappedEvent.dtstamp = value;
@@ -107,7 +104,7 @@ const mapEventToObject = (eventData) => {
         mappedEvent.xAltDesc = value;
         break;
       default:
-      // Handle any other details that may be present
+        break;
     }
   });
 

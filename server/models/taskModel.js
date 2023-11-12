@@ -8,6 +8,7 @@ const getAllTasksForUser = async (userId) => {
 };
 
 // Add more task-related database operations here...
+// Honestly might abandon the models...
 
 module.exports = {
   getAllTasksForUser,
