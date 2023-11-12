@@ -16,8 +16,8 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import SchemaIcon from "@mui/icons-material/Schema";
 
-const pages = ["Assignments", "Calendar", "FAQ"];
-const settings = ["Profile", "Account", "Dashboard", "Signin", "Logout"];
+const pages = ["Assignments", "Calendar", "FAQ", "Debug"];
+const settings = ["Profile", "Account", "Dashboard", "Login", "Logout"];
 
 function NavBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);

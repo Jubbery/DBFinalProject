@@ -27,6 +27,18 @@ CREATE TABLE Tasks (
   task_type task_type_enum
 );
 
+CREATE TABLE CanvasEvents (
+  dtstamp TEXT,
+  uid TEXT PRIMARY KEY,
+  dtstart TEXT,
+  class TEXT,
+  description TEXT,
+  sequence INTEGER,
+  summary TEXT,
+  url TEXT,
+  x_alt_desc TEXT
+);
+
 CREATE TABLE Tag (
   tag_name VARCHAR(250) PRIMARY KEY,
   course_id VARCHAR(250) UNIQUE,

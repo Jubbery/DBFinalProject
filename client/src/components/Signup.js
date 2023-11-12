@@ -1,4 +1,3 @@
-// Signup.js
 import React from "react";
 import {
   Button,
@@ -16,6 +15,7 @@ function Signup() {
     password: "",
     showPassword: false,
   });
+  const [errorMessage, setErrorMessage] = React.useState("");
 
   const handleChange = (prop) => (event) => {
     setFormData({ ...formData, [prop]: event.target.value });
@@ -25,13 +25,36 @@ function Signup() {
     setFormData({ ...formData, showPassword: !formData.showPassword });
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
+    try {
+      const response = await fetch("http://localhost:8000/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Signup failed");
+      }
+      // Handle successful signup (e.g., redirect to login page)
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <div>
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        <form noValidate>
+        <form noValidate onSubmit={handleSubmit}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -70,6 +93,7 @@ function Signup() {
               ),
             }}
           />
+          {errorMessage && <p>{errorMessage}</p>}
           <Button type="submit" fullWidth variant="contained" color="primary">
             Sign Up
           </Button>

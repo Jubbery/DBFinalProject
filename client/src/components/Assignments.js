@@ -1,36 +1,50 @@
+import React, { Fragment, useEffect, useState, useCallback } from "react";
 import ListHeader from "./ListHeader";
 import ListItem from "./ListItem";
-import React, { Fragment, useEffect, useState } from "react";
+import { useUser } from "../utils/UserContext";
 
 const Assignments = () => {
-  const user_id = 12345678; // TESTING hardcoded id
+  const { user } = useUser();
   const [myTasks, setTasks] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const getData = async () => {
+  const getData = useCallback(async () => {
+    if (!user) return;
+
+    setIsLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`http://localhost:8000/tasks/${user_id}`);
+      const response = await fetch(
+        `http://localhost:8000/tasks/order/deadline/${user.user_id}`
+      );
+      if (!response.ok) {
+        throw new Error(`Error fetching tasks: ${response.statusText}`);
+      }
       const json = await response.json();
       setTasks(json);
     } catch (err) {
       console.error(err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [user]); // Dependencies for useCallback
 
-  useEffect(() => getData, []);
+  useEffect(() => {
+    getData();
+  }, [getData]); // Dependency array for useEffect
 
-  console.log(myTasks);
-
-  // Sort tasks by date
-  const sortedTasks = myTasks?.sort(
-    (a, b) => new Date(a.date) - new Date(b.date)
-  );
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <Fragment>
       <ListHeader listName={"📚 Class Assignments List"} />
-      {sortedTasks?.map((myTask) => (
-        <ListItem key={myTask.task_id} myTask={myTask} />
-      ))}
+      {myTasks &&
+        myTasks.map((myTask) => (
+          <ListItem key={myTask.task_id} myTask={myTask} />
+        ))}
     </Fragment>
   );
 };
