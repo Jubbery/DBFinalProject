@@ -8,10 +8,11 @@ CREATE TYPE task_type_enum AS ENUM ('Exam', 'Project', 'Assignment');
 
 CREATE TABLE Users (
   user_id INT PRIMARY KEY,
-  fname VARCHAR(250) NOT NULL,
-  lname VARCHAR(250) NOT NULL,
+  fname VARCHAR(250),
+  lname VARCHAR(250),
   email VARCHAR(250) UNIQUE NOT NULL,
-  hashed_pass CHAR(64) NOT NULL
+  hashed_pass CHAR(64) NOT NULL,
+  canvas_token VARCHAR(250)
 );
 
 CREATE TABLE Tasks (
@@ -71,3 +72,12 @@ CREATE TABLE Courses (
   course_code VARCHAR(250),
   semester VARCHAR(250)
 );
+
+
+/*
+INSERT INTO Users (user_id, fname, lname, email, hashed_pass)
+VALUES (12345678, 'John', 'Doe', 'john.doe@example.com', 'hashedpassword123' );
+
+INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type)
+VALUES (12345678, 'Study for Exam', '2023-10-12', '2023-10-20', 'High', 'Not-Started', CURRENT_TIMESTAMP, 'Chapter 1-3', 'Exam');
+*/
