@@ -11,7 +11,7 @@ CREATE TABLE Users (
   fname VARCHAR(250),
   lname VARCHAR(250),
   email VARCHAR(250) UNIQUE NOT NULL,
-  hashed_pass CHAR(64) NOT NULL
+  hashed_pass CHAR(60) NOT NULL
 );
 
 CREATE TABLE Tasks (
@@ -78,8 +78,8 @@ CREATE TABLE Courses (
 -- plaintext password is "password" associated hash is '$2b$10$0krZmoyvT0NVvRAtZ1eBOeUw7ZLrikWtaCK1xbDCBe1IFi2bPO.iS    '
 -- Users Table
 INSERT INTO Users (fname, lname, email, hashed_pass) VALUES
-  ('John', 'Doe', 'john.doe@example.com', '$2b$10$0krZmoyvT0NVvRAtZ1eBOeUw7ZLrikWtaCK1xbDCBe1IFi2bPO.iS    '),
-  ('Jane', 'Smith', 'jane.smith@example.com', '$2b$10$0krZmoyvT0NVvRAtZ1eBOeUw7ZLrikWtaCK1xbDCBe1IFi2bPO.iS    ');
+  ('John', 'Doe', 'john.doe@example.com', '$2b$10$2younuZUPbBrWIH15j6joOACwST4f3TAAvsB1HOCORc9mZuqNJSRa'),
+  ('Jane', 'Smith', 'jane.smith@example.com', '$2b$10$2younuZUPbBrWIH15j6joOACwST4f3TAAvsB1HOCORc9mZuqNJSRa');
 
 -- Tasks Table
 INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES

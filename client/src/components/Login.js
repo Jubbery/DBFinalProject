@@ -17,13 +17,15 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
       if (!response.ok) {
+        console.log("Login Fail!"); // TESTING Output message on fail login
         throw new Error("Login failed");
       }
+      console.log("Login Success!"); // TESTING Output message on successful login
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
-
+  
   return (
     <Grid
       container

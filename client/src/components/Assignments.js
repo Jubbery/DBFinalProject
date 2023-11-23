@@ -15,27 +15,61 @@ const Assignments = () => {
     console.log("TESTING: No Current User:", user);
   }
 
+  // // OLD CODE:
+  // const getData = useCallback(async () => {
+  //   if (!user) return;
+
+  //   setIsLoading(true);
+  //   setError(null);
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:8000/tasks/order/deadline/${user.user_id}`
+  //     );
+  //     if (!response.ok) {
+  //       throw new Error(`Error fetching tasks: ${response.statusText}`);
+  //     }
+  //     const json = await response.json();
+  //     setTasks(json);
+  //   } catch (err) {
+  //     console.error(err);
+  //     setError(err.message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, [user]); // Dependencies for useCallback
+
+  // NEW CODE using JWT:
   const getData = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      console.log("No Assignments avail to null user: ", user); 
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
     try {
+      console.log("TESTING: Fetching tasks..."); // Log before fetching
       const response = await fetch(
-        `http://localhost:8000/tasks/order/deadline/${user.user_id}`
+        `http://localhost:8000/tasks/order/deadline/${user.user_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`, // Include the JWT in the Authorization header
+          },
+        }
       );
       if (!response.ok) {
         throw new Error(`Error fetching tasks: ${response.statusText}`);
       }
       const json = await response.json();
+      console.log("TESTING: Tasks fetched successfully:", json); // Log after successful fetch
       setTasks(json);
     } catch (err) {
-      console.error(err);
+      console.error("TESTING: Error fetching tasks:", err); // Log error
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }, [user]); // Dependencies for useCallback
+  }, [user]);
 
   useEffect(() => {
     getData();
