@@ -33,7 +33,6 @@ const loginUser = async (req, res) => {
     }
 
     // Check if password matches, Comment out to skip password verification 
-    // THIS IS NOT WORKING: there is some problem where the hashed password has spaces added to the end of it, check the console log for example.
     const validPassword = await bcrypt.compare(password, user.rows[0].hashed_pass);
     console.log('Password validation result:', validPassword); // Log the result of the password validation
 
