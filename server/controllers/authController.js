@@ -4,34 +4,32 @@ const pool = require("../db");
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
+  console.log('Received login request:', { email, password }); // Log the received login request
+
   try {
     // Check if user exists
-    const user = await pool.query("SELECT * FROM Users WHERE email = $1", [
-      email,
-    ]);
+    const user = await pool.query("SELECT * FROM Users WHERE email = $1", [email]);
+    console.log('User query result:', user.rows); // Log the result of the user query
+
     if (user.rows.length === 0) {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
 
     // Check if password matches
-    const validPassword = await bcrypt.compare(
-      password,
-      user.rows[0].hashed_pass
-    );
+    const validPassword = await bcrypt.compare(password, user.rows[0].hashed_pass);
+    console.log('Password validation result:', validPassword); // Log the result of the password validation
+
     if (!validPassword) {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
 
     // Create and assign a token
-    const token = jwt.sign(
-      { user_id: user.rows[0].user_id },
-      process.env.JWT_SECRET,
-      { expiresIn: "2 days" }
-    );
+    const token = jwt.sign({ user_id: user.rows[0].user_id }, process.env.JWT_SECRET, { expiresIn: "2 days" });
+    console.log('Generated token:', token); // Log the generated token
 
     res.json({ token });
   } catch (err) {
-    console.error(err.message);
+    console.error('Error during login:', err.message); // Log any errors that occur
     res.status(500).send("Server Error");
   }
 };
