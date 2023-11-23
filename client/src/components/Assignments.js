@@ -9,6 +9,12 @@ const Assignments = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  if (user) { // TESTING user logging
+    console.log("TESTING: Current User:", user.user_id);
+  } else {
+    console.log("TESTING: No Current User:", user);
+  }
+
   const getData = useCallback(async () => {
     if (!user) return;
 
