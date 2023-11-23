@@ -7,9 +7,9 @@ CREATE TYPE notification_status_enum AS ENUM ('Read', 'Unread');
 CREATE TYPE task_type_enum AS ENUM ('Exam', 'Project', 'Assignment');
 
 CREATE TABLE Users (
-  user_id INT PRIMARY KEY,
-  fname VARCHAR(250) NOT NULL,
-  lname VARCHAR(250) NOT NULL,
+  user_id SERIAL PRIMARY KEY,
+  fname VARCHAR(250),
+  lname VARCHAR(250),
   email VARCHAR(250) UNIQUE NOT NULL,
   hashed_pass CHAR(64) NOT NULL
 );
@@ -72,39 +72,41 @@ CREATE TABLE Courses (
   semester VARCHAR(250)
 );
 
---
+-- SIMULATED DATA FOR DATABASE 
 
--- Insert into Users
-INSERT INTO Users(user_id, fname, lname, email, hashed_pass)
-VALUES (1, 'John', 'Doe', 'john.doe@example.com', 'hashedpassword1'),
-     (2, 'Jane', 'Doe', 'jane.doe@example.com', 'hashedpassword2');
+-- Inserting data into Users table
+-- plaintext password is "password" associated hash is '$2b$10$0krZmoyvT0NVvRAtZ1eBOeUw7ZLrikWtaCK1xbDCBe1IFi2bPO.iS    '
+-- Users Table
+INSERT INTO Users (fname, lname, email, hashed_pass) VALUES
+  ('John', 'Doe', 'john.doe@example.com', '$2b$10$0krZmoyvT0NVvRAtZ1eBOeUw7ZLrikWtaCK1xbDCBe1IFi2bPO.iS    '),
+  ('Jane', 'Smith', 'jane.smith@example.com', '$2b$10$0krZmoyvT0NVvRAtZ1eBOeUw7ZLrikWtaCK1xbDCBe1IFi2bPO.iS    ');
 
--- Insert into Tasks
-INSERT INTO Tasks(user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type)
-VALUES (1, 'Task 1', '2022-01-01', '2022-01-31', 'High', 'Not-Started', CURRENT_TIMESTAMP, 'This is a note', 'Exam'),
-     (2, 'Task 2', '2022-02-01', '2022-02-28', 'Medium', 'In-Progress', CURRENT_TIMESTAMP, 'This is another note', 'Project');
+-- Tasks Table
+INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES
+  (1, 'Study for Exam 1', '2023-11-22', '2023-11-30', 'High', 'Not-Started', '2023-11-22 12:00:00', 'Prepare for the upcoming exam', 'Exam'),
+  (2, 'Complete Project', '2023-11-25', '2023-12-05', 'Medium', 'In-Progress', '2023-11-22 14:30:00', 'Work on the assigned project', 'Project');
 
--- Insert into Tag
-INSERT INTO Tag(tag_name, course_id, tag_description)
-VALUES ('Tag1', 'Course1', 'This is a tag description'),
-     ('Tag2', 'Course2', 'This is another tag description');
+-- Tag Table
+INSERT INTO Tag (tag_name, course_id, tag_description) VALUES
+  ('Math', 'MATH101', 'Introduction to Mathematics'),
+  ('CS', 'CS201', 'Introduction to Computer Science');
 
--- Insert into TaskTag
-INSERT INTO TaskTag(task_id, tag_name)
-VALUES (1, 'Tag1'),
-     (2, 'Tag2');
+-- TaskTag Table
+INSERT INTO TaskTag (task_id, tag_name) VALUES
+  (1, 'Math'),
+  (2, 'CS');
 
--- Insert into Notifications
-INSERT INTO Notifications(user_id, message, notification_status, created_at, remind_at)
-VALUES (1, 'This is a notification', 'Unread', CURRENT_TIMESTAMP, '2022-01-15 12:00:00'),
-     (2, 'This is another notification', 'Read', CURRENT_TIMESTAMP, '2022-02-15 12:00:00');
+-- Notifications Table
+INSERT INTO Notifications (user_id, message, notification_status, created_at, remind_at) VALUES
+  (1, 'Reminder: Exam Tomorrow', 'Unread', '2023-11-29 18:00:00', '2023-11-29 16:00:00'),
+  (2, 'Project Deadline Approaching', 'Unread', '2023-12-04 10:00:00', '2023-12-03 15:00:00');
 
--- Insert into TaskNotification
-INSERT INTO TaskNotification(task_id, notification_id)
-VALUES (1, 1),
-     (2, 2);
+-- TaskNotification Table
+INSERT INTO TaskNotification (task_id, notification_id) VALUES
+  (1, 1),
+  (2, 2);
 
--- Insert into Courses
-INSERT INTO Courses(course_id, tag_name, description, course_code, semester)
-VALUES ('Course1', 'Tag1', 'This is a course description', 'CSE101', 'Spring 2022'),
-     ('Course2', 'Tag2', 'This is another course description', 'CSE102', 'Spring 2022');
+-- Courses Table
+INSERT INTO Courses (course_id, tag_name, description, course_code, semester) VALUES
+  ('MATH101', 'Math', 'Introduction to Mathematics', 'MATH101', 'Fall 2023'),
+  ('CS201', 'CS', 'Introduction to Computer Science', 'CS201', 'Fall 2023');
