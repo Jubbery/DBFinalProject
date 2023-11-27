@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { TextField, Button, Link, Grid, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,12 +23,17 @@ export default function Login() {
         console.log("Login Fail!"); // TESTING Output message on fail login
         throw new Error("Login failed");
       }
-      console.log("Login Success!"); // TESTING Output message on successful login
+      const data = await response.json();
+      localStorage.setItem("token", data.token); // Store the token
+      console.log(data);
+      localStorage.setItem("uid", data.uid); // Store the token
+
+      navigate("/assignments"); // Redirect to /assignments
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
-  
+
   return (
     <Grid
       container

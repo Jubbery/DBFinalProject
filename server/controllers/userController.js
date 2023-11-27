@@ -1,8 +1,8 @@
-const pool = require("../db");
+const db = require("../db");
 
 const getAllUsers = async (req, res) => {
   try {
-    const allUsers = await pool.query("SELECT * FROM Users");
+    const allUsers = await db.query("SELECT * FROM Users");
     res.json(allUsers.rows);
   } catch (err) {
     console.error(err.message);

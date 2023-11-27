@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useState, useCallback } from "react";
 import ListHeader from "./ListHeader";
 import ListItem from "./ListItem";
 import { useUser } from "../utils/UserContext";
+import { Button } from "@mui/material";
 
 const Assignments = () => {
   const { user } = useUser();
@@ -9,7 +10,8 @@ const Assignments = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  if (user) { // TESTING user logging
+  if (user) {
+    // TESTING user logging
     console.log("TESTING: Current User:", user.user_id);
   } else {
     console.log("TESTING: No Current User:", user);
@@ -40,20 +42,16 @@ const Assignments = () => {
 
   // NEW CODE using JWT:
   const getData = useCallback(async () => {
-    if (!user) {
-      console.log("No Assignments avail to null user: ", user); 
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
+    const token = localStorage.getItem("token");
     try {
       console.log("TESTING: Fetching tasks..."); // Log before fetching
       const response = await fetch(
-        `http://localhost:8000/tasks/order/deadline/${user.user_id}`,
+        `http://localhost:8000/tasks/order/deadline`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('jwt')}`, // Include the JWT in the Authorization header
+            Authorization: `Bearer ${token}`, // Include the JWT in the Authorization header
           },
         }
       );
@@ -69,7 +67,7 @@ const Assignments = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     getData();
@@ -80,7 +78,14 @@ const Assignments = () => {
 
   return (
     <Fragment>
-      <ListHeader listName={"📚 Class Assignments List"} />
+      <div className="list-header">
+        <h1>📚 Class Assignments List</h1>
+        <div className="button-container">
+          <Button variant="contained" className="create">
+            ADD NEW
+          </Button>
+        </div>
+      </div>
       {myTasks &&
         myTasks.map((myTask) => (
           <ListItem key={myTask.task_id} myTask={myTask} />

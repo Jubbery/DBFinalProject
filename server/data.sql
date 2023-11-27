@@ -12,6 +12,7 @@ CREATE TABLE Users (
   lname VARCHAR(250),
   email VARCHAR(250) UNIQUE NOT NULL,
   hashed_pass CHAR(60) NOT NULL
+  canvasurl VARCHAR(250) DEFAULT NULL,
 );
 
 CREATE TABLE Tasks (
@@ -29,7 +30,7 @@ CREATE TABLE Tasks (
 
 CREATE TABLE CanvasEvents (
   dtstamp TEXT,
-  uid TEXT PRIMARY KEY,
+  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
   dtstart TEXT,
   class TEXT,
   description TEXT,

@@ -89,7 +89,18 @@ export default function Profile() {
                 label="Password"
                 type="password"
                 id="password"
-                autoComplete="current-password"
+                autoComplete="password"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                name="canvasUrl"
+                label="Canvas Url"
+                type="input"
+                id="canvasUrl"
               />
             </Grid>
           </Grid>

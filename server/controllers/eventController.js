@@ -1,55 +1,61 @@
-const pool = require("../db");
+const db = require("../db");
 const fetch = require("node-fetch");
 const ICAL = require("ical.js");
+const jwt = require("jsonwebtoken");
 
-const processCanvasEvent = async (req, res) => {
-  const eventData = req.body; // The mapped event object sent in the request body
+const storeCanvasEvents = async (req, res) => {
+  // Assuming the Canvas events data is sent in the request body
+  const token = req.header("Authorization").split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user_id = decoded.user_id;
+
+  const events = req.body.events;
+  console.log(events);
 
   try {
-    // Check if the event with the same uid already exists
-    const existingEvent = await pool.query(
-      "SELECT * FROM events WHERE uid = $1",
-      [eventData.uid]
-    );
+    // Begin a transaction
+    await db.query("BEGIN");
 
-    if (existingEvent.rows.length > 0) {
-      // If the event exists, update the existing record
+    // Insert each event into the CanvasEvents table
+    for (const event of events) {
       await db.query(
-        "UPDATE events SET dtstamp = $1, dtstart = $2, class = $3, description = $4, sequence = $5, summary = $6, url = $7, x_alt_desc = $8 WHERE uid = $9",
+        `
+                INSERT INTO CanvasEvents 
+                (dtstamp, user_id, dtstart, class, description, sequence, summary, url, x_alt_desc)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                ON CONFLICT (user_id) DO UPDATE 
+                SET dtstamp = EXCLUDED.dtstamp,
+                    dtstart = EXCLUDED.dtstart,
+                    class = EXCLUDED.class,
+                    description = EXCLUDED.description,
+                    sequence = EXCLUDED.sequence,
+                    summary = EXCLUDED.summary,
+                    url = EXCLUDED.url,
+                    x_alt_desc = EXCLUDED.x_alt_desc;
+            `,
         [
-          eventData.dtstamp,
-          eventData.dtstart,
-          eventData.class,
-          eventData.description,
-          eventData.sequence,
-          eventData.summary,
-          eventData.url,
-          eventData.xAltDesc,
-          eventData.uid,
-        ]
-      );
-    } else {
-      // If the event does not exist, insert a new record
-      await db.query(
-        "INSERT INTO events (dtstamp, uid, dtstart, class, description, sequence, summary, url, x_alt_desc) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-        [
-          eventData.dtstamp,
-          eventData.uid,
-          eventData.dtstart,
-          eventData.class,
-          eventData.description,
-          eventData.sequence,
-          eventData.summary,
-          eventData.url,
-          eventData.xAltDesc,
+          event.dtstamp,
+          user_id,
+          event.dtstart,
+          event.class,
+          event.description,
+          event.sequence,
+          event.summary,
+          event.url,
+          event.x_alt_desc,
         ]
       );
     }
 
-    res.status(200).json({ message: "Event processed successfully." });
+    // Commit the transaction
+    await db.query("COMMIT");
+
+    res.status(200).send("Events stored successfully");
   } catch (error) {
-    console.error("Database operation failed", error);
-    res.status(500).json({ error: "Database operation failed" });
+    // Rollback the transaction on error
+    await db.query("ROLLBACK");
+    console.error("Error storing events:", error);
+    res.status(500).send("Failed to store events");
   }
 };
 
@@ -109,7 +115,7 @@ const fetchAllCanvasEvents = async (req, res) => {
 };
 
 module.exports = {
-  processCanvasEvent,
+  storeCanvasEvents,
   fetchCanvasEvents,
   fetchAllCanvasEvents,
 };
