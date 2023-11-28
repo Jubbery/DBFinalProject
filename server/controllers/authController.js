@@ -56,8 +56,7 @@ const loginUser = async (req, res) => {
     );
     console.log("Generated token:", token); // Log the generated token
     console.log("Generated uid:", user.rows[0].user_id);
-    res.json({ token: token });
-    res.json({ uid: user.rows[0].user_id });
+    res.json({ token: token, uid: user.rows[0].user_id });
   } catch (err) {
     console.error("Error during login:", err.message); // Log any errors that occur
     res.status(500).send("Server Error");
