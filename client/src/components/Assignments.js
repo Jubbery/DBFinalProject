@@ -4,7 +4,7 @@ import ListItem from "./ListItem";
 import { useUser } from "../utils/UserContext";
 
 const Assignments = () => {
-  const { user } = useUser();
+  const {user} = useUser();
   const [myTasks, setTasks] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);

@@ -2,7 +2,7 @@ const Modal = () => {
     const mode = 'edit'
     
     const handleChange = () => {
-        console.log('changing')
+        console.log('changing!')
     }
 
     return (
@@ -17,16 +17,23 @@ const Modal = () => {
             <input 
               required
               maxLength={250} 
-              placeholder="Your task goes here."
+              placeholder=" Your task goes here."
               name="title"
               value={""}
               onChange={handleChange}
             />
             <br/>
             <input
+              required
+              type="range"
+              min="0"
+              max="100"
+              name="progress"
+              value={""}
+              onChange={handleChange}
             />
             <br/>
-            <input type="submit"/>
+            <input className={mode} type="submit"/>
           </form>
 
         </div>

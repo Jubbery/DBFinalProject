@@ -42,6 +42,17 @@ body {
   background-color: transparent;
 }
 
+.edit {
+  border: rgb(169, 93, 0) 1px solid;
+  color: rgb(255, 145, 10);
+  text-transform: uppercase;
+}
+
+.edit:hover {
+  background-color: rgb(255, 145, 10);
+  color: white;
+}
+
 /* List Header */
 .list-header {
   width: 100%;
