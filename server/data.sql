@@ -11,8 +11,8 @@ CREATE TABLE Users (
   fname VARCHAR(250),
   lname VARCHAR(250),
   email VARCHAR(250) UNIQUE NOT NULL,
-  hashed_pass CHAR(60) NOT NULL
-  canvasurl VARCHAR(250) DEFAULT NULL,
+  hashed_pass CHAR(60) NOT NULL,
+  canvasurl VARCHAR(250) DEFAULT NULL
 );
 
 CREATE TABLE Tasks (
@@ -72,6 +72,37 @@ CREATE TABLE Courses (
   course_code VARCHAR(250),
   semester VARCHAR(250)
 );
+
+CREATE OR REPLACE FUNCTION trigger_add_event_to_task()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM Tasks WHERE task_id = NEW.event_id) THEN
+    -- If no task with this task_id exists, insert a new task
+    INSERT INTO Tasks (task_id, user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type)
+    VALUES (NEW.event_id, NEW.user_id, NEW.summary, NEW.dtstart::DATE, NEW.dtstart::DATE + INTERVAL '1 day', 'Medium', 'Not-Started', NOW(), NEW.description, 'Assignment');
+  ELSE
+    -- If a task with this task_id already exists, update that task
+    UPDATE Tasks SET
+      user_id = NEW.user_id,
+      task_name = NEW.summary,
+      start_date = NEW.dtstart::DATE,
+      deadline = NEW.dtstart::DATE + INTERVAL '1 day',
+      priority_level = 'Medium',
+      task_status = 'Not-Started',
+      created_at = NOW(),
+      note = NEW.description,
+      task_type = 'Assignment'
+    WHERE task_id = NEW.event_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER add_event_to_task
+AFTER INSERT OR UPDATE ON CanvasEvents
+FOR EACH ROW
+EXECUTE FUNCTION trigger_add_event_to_task();
+
 
 -- SIMULATED DATA FOR DATABASE 
 
