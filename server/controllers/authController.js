@@ -37,16 +37,16 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
 
-    // Check if password matches, Comment out to skip password verification
-    const validPassword = await bcrypt.compare(
-      password,
-      user.rows[0].hashed_pass
-    );
-    console.log("Password validation result:", validPassword); // Log the result of the password validation
+    // // Check if password matches, Comment out to skip password verification
+    // const validPassword = await bcrypt.compare(
+    //   password,
+    //   user.rows[0].hashed_pass
+    // );
+    // console.log("Password validation result:", validPassword); // Log the result of the password validation
 
-    if (!validPassword) {
-      return res.status(400).json({ error: "Invalid Credentials" });
-    }
+    // if (!validPassword) {
+    //   return res.status(400).json({ error: "Invalid Credentials" });
+    // }
 
     // Create and assign a token
     const token = jwt.sign(

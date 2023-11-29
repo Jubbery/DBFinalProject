@@ -9,6 +9,10 @@ const Assignments = () => {
   const [myTasks, setTasks] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [taskName, setTaskName] = useState('');
+  const [deadline, setDeadline] = useState('');
+  const [note, setNote] = useState('');
 
   if (user) {
     // TESTING user logging
@@ -16,29 +20,6 @@ const Assignments = () => {
   } else {
     console.log("TESTING: No Current User:", user);
   }
-
-  // // OLD CODE:
-  // const getData = useCallback(async () => {
-  //   if (!user) return;
-
-  //   setIsLoading(true);
-  //   setError(null);
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8000/tasks/order/deadline/${user.user_id}`
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error(`Error fetching tasks: ${response.statusText}`);
-  //     }
-  //     const json = await response.json();
-  //     setTasks(json);
-  //   } catch (err) {
-  //     console.error(err);
-  //     setError(err.message);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }, [user]); // Dependencies for useCallback
 
   // NEW CODE using JWT:
   const getData = useCallback(async () => {
@@ -76,6 +57,65 @@ const Assignments = () => {
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
+
+  // MODAL CODE:
+  const openModal = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  const handleChange = (event) => {
+    switch (event.target.name) {
+      case 'taskName':
+        setTaskName(event.target.value);
+        break;
+      case 'deadline':
+        setDeadline(event.target.value);
+        break;
+      case 'note':
+        setNote(event.target.value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const addTask = async (event) => {
+    event.preventDefault();
+  
+    const newTask = {
+      name: taskName,
+      deadline: deadline,
+      note: note,
+    };
+  
+    try {
+      const response = await fetch('http://localhost:8000/tasks', { // Make a POST request to the /tasks endpoint
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTask),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Response was not ok');
+      }
+  
+      const taskData = await response.json();
+      setTasks([...myTasks, taskData]);
+  
+      closeModal();
+    } catch (error) {
+      console.error('Error during task creation:', error);
+    }
+  };
+
+  // END MODAL CODE, check if this even working
+
   return (
     <Fragment>
       <div className="list-header">
@@ -84,6 +124,33 @@ const Assignments = () => {
           <Button variant="contained" className="create">
             ADD NEW
           </Button>
+          
+
+          <Button onClick={openModal}>Add New Task</Button> 
+
+          {showModal && (
+            <div className="modal">
+              <div className="modal-content">
+                <span className="close-button" onClick={closeModal}>&times;</span>
+                <form onSubmit={addTask}>
+                  <label>
+                    Task name:
+                    <input type="text" name="taskName" value={taskName} onChange={handleChange} />
+                  </label>
+                  <label>
+                    Deadline:
+                    <input type="date" name="deadline" value={deadline} onChange={handleChange} />
+                  </label>
+                  <label>
+                    Note:
+                    <textarea name="note" value={note} onChange={handleChange} />
+                  </label>
+                  <input type="submit" value="Add Task" />
+                </form>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
       {myTasks &&
