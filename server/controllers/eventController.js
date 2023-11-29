@@ -3,46 +3,74 @@ const fetch = require("node-fetch");
 const ICAL = require("ical.js");
 const jwt = require("jsonwebtoken");
 
-const storeCanvasEvents = async (req, res) => {
-  // Assuming the Canvas events data is sent in the request body
-  const token = req.header("Authorization").split(" ")[1];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const user_id = decoded.user_id;
+const convertJCalToJSON = (jCal) => {
+  const jsonEvent = {};
+  jCal[1].forEach((prop) => {
+    const propName = prop[0];
+    const propValue = prop[3];
+    jsonEvent[propName] = propValue;
+  });
+  return jsonEvent;
+};
 
-  const events = req.body.events;
-  console.log(events);
+const storeCanvasEvents = async (req, res) => {
+  const user_id = jwt.verify(
+    req.header("Authorization").split(" ")[1],
+    process.env.JWT_SECRET
+  ).user_id;
 
   try {
-    // Begin a transaction
+    // Get the Canvas URL for the user
+    const userUrlResult = await db.query(
+      "SELECT canvasurl FROM Users WHERE user_id = $1",
+      [user_id]
+    );
+    console.log("User URL result:", userUrlResult.rows);
+    const canvasUrl = userUrlResult.rows[0].canvasurl;
+
+    if (!canvasUrl) {
+      return res.status(404).send("Canvas URL not found for the user");
+    }
+
+    // Fetch events from the Canvas URL
+    const response = await fetch(canvasUrl);
+    const data = await response.text();
+    const jcalData = ICAL.parse(data);
+    const comp = new ICAL.Component(jcalData);
+    const events = comp.getAllSubcomponents("vevent").map((vevent) => {
+      const event = new ICAL.Event(vevent);
+      const eventJson = convertJCalToJSON(event.component.jCal);
+      return eventJson;
+    });
+
+    // Begin the transaction
     await db.query("BEGIN");
 
     // Insert each event into the CanvasEvents table
     for (const event of events) {
+      // console.log("Inserting event:", Object.keys(event.component.jCal));
+      // Modify this query to match your Canvas event object structure
       await db.query(
         `
-                INSERT INTO CanvasEvents 
-                (dtstamp, user_id, dtstart, class, description, sequence, summary, url, x_alt_desc)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                ON CONFLICT (user_id) DO UPDATE 
-                SET dtstamp = EXCLUDED.dtstamp,
-                    dtstart = EXCLUDED.dtstart,
-                    class = EXCLUDED.class,
-                    description = EXCLUDED.description,
-                    sequence = EXCLUDED.sequence,
-                    summary = EXCLUDED.summary,
-                    url = EXCLUDED.url,
-                    x_alt_desc = EXCLUDED.x_alt_desc;
-            `,
+        INSERT INTO CanvasEvents 
+        (event_id, dtstamp, user_id, dtstart, description, summary, url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (event_id) DO UPDATE 
+        SET dtstamp = EXCLUDED.dtstamp,
+            user_id = EXCLUDED.user_id,
+            dtstart = EXCLUDED.dtstart,
+            description = EXCLUDED.description,
+            summary = EXCLUDED.summary,
+            url = EXCLUDED.url
+      `,
         [
+          event.uid,
           event.dtstamp,
           user_id,
           event.dtstart,
-          event.class,
           event.description,
-          event.sequence,
           event.summary,
           event.url,
-          event.x_alt_desc,
         ]
       );
     }
@@ -51,6 +79,7 @@ const storeCanvasEvents = async (req, res) => {
     await db.query("COMMIT");
 
     res.status(200).send("Events stored successfully");
+    console.log("Events stored successfully");
   } catch (error) {
     // Rollback the transaction on error
     await db.query("ROLLBACK");
@@ -67,6 +96,12 @@ const fetchCanvasEvents = async (req, res) => {
   }
 
   try {
+    const user_id = jwt.verify(
+      req.header("Authorization").split(" ")[1],
+      process.env.JWT_SECRET
+    ).user_id;
+    await updateUserCanvasUrl(user_id, canvasURL);
+
     const response = await fetch(canvasURL);
     const data = await response.text();
 
@@ -80,12 +115,26 @@ const fetchCanvasEvents = async (req, res) => {
         start: event.startDate.toString(),
       };
     });
-    console.log(events);
 
     res.send({ events });
   } catch (error) {
     console.error("Error fetching Canvas events:", error.message);
     res.status(500).send({ error: "Failed to fetch events." });
+  }
+};
+
+const updateUserCanvasUrl = async (userId, canvasUrl) => {
+  try {
+    const query = `
+      UPDATE Users
+      SET canvasurl = $1
+      WHERE user_id = $2;
+    `;
+    const values = [canvasUrl, userId];
+    await db.query(query, values);
+    console.log("Canvas URL updated successfully");
+  } catch (err) {
+    console.error("Error updating Canvas URL:", err);
   }
 };
 

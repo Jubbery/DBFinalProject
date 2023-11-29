@@ -11,12 +11,12 @@ CREATE TABLE Users (
   fname VARCHAR(250),
   lname VARCHAR(250),
   email VARCHAR(250) UNIQUE NOT NULL,
-  hashed_pass CHAR(60) NOT NULL
+  hashed_pass CHAR(60) NOT NULL,
   canvasurl VARCHAR(250) DEFAULT NULL,
 );
 
 CREATE TABLE Tasks (
-  task_id SERIAL PRIMARY KEY,
+  task_id TEXT PRIMARY KEY,
   user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
   task_name VARCHAR(250) NOT NULL,
   start_date DATE,
@@ -24,20 +24,18 @@ CREATE TABLE Tasks (
   priority_level priority_enum,
   task_status task_status_enum,
   created_at TIMESTAMP NOT NULL,
-  note VARCHAR(250),
+  note TEXT,
   task_type task_type_enum
 );
 
 CREATE TABLE CanvasEvents (
+  event_id TEXT PRIMARY KEY,
   dtstamp TEXT,
   user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
   dtstart TEXT,
-  class TEXT,
   description TEXT,
-  sequence INTEGER,
   summary TEXT,
   url TEXT,
-  x_alt_desc TEXT
 );
 
 CREATE TABLE Tag (
@@ -73,6 +71,38 @@ CREATE TABLE Courses (
   semester VARCHAR(250)
 );
 
+CREATE OR REPLACE FUNCTION trigger_add_event_to_task()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM Tasks WHERE task_id = NEW.event_id) THEN
+    -- If no task with this task_id exists, insert a new task
+    INSERT INTO Tasks (task_id, user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type)
+    VALUES (NEW.event_id, NEW.user_id, NEW.summary, NEW.dtstart::DATE, NEW.dtstart::DATE + INTERVAL '1 day', 'Medium', 'Not-Started', NOW(), NEW.description, 'Assignment');
+  ELSE
+    -- If a task with this task_id already exists, update that task
+    UPDATE Tasks SET
+      user_id = NEW.user_id,
+      task_name = NEW.summary,
+      start_date = NEW.dtstart::DATE,
+      deadline = NEW.dtstart::DATE + INTERVAL '1 day',
+      priority_level = 'Medium',
+      task_status = 'Not-Started',
+      created_at = NOW(),
+      note = NEW.description,
+      task_type = 'Assignment'
+    WHERE task_id = NEW.event_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER add_event_to_task
+AFTER INSERT OR UPDATE ON CanvasEvents
+FOR EACH ROW
+EXECUTE FUNCTION trigger_add_event_to_task();
+
+
+
 -- SIMULATED DATA FOR DATABASE 
 
 -- Inserting data into Users table
@@ -83,9 +113,9 @@ INSERT INTO Users (fname, lname, email, hashed_pass) VALUES
   ('Jane', 'Smith', 'jane.smith@example.com', '$2b$10$2younuZUPbBrWIH15j6joOACwST4f3TAAvsB1HOCORc9mZuqNJSRa');
 
 -- Tasks Table
-INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES
-  (1, 'Study for Exam 1', '2023-11-22', '2023-11-30', 'High', 'Not-Started', '2023-11-22 12:00:00', 'Prepare for the upcoming exam', 'Exam'),
-  (2, 'Complete Project', '2023-11-25', '2023-12-05', 'Medium', 'In-Progress', '2023-11-22 14:30:00', 'Work on the assigned project', 'Project');
+INSERT INTO Tasks (task_id, user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES
+  ('34523', 1, 'Study for Exam 1', '2023-11-22', '2023-11-30', 'High', 'Not-Started', '2023-11-22 12:00:00', 'Prepare for the upcoming exam', 'Exam'),
+  ('12312', 2, 'Complete Project', '2023-11-25', '2023-12-05', 'Medium', 'In-Progress', '2023-11-22 14:30:00', 'Work on the assigned project', 'Project');
 
 -- Tag Table
 INSERT INTO Tag (tag_name, course_id, tag_description) VALUES
