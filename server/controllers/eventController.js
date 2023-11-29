@@ -76,9 +76,11 @@ const fetchCanvasEvents = async (req, res) => {
       const event = new ICAL.Event(vevent);
       return {
         title: event.summary,
+        description: event.description,
         start: event.startDate.toString(),
       };
     });
+    console.log(events);
 
     res.send({ events });
   } catch (error) {

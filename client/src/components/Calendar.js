@@ -17,33 +17,93 @@ const Calendar = () => {
   const [eventDetailsOpen, setEventDetailsOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [newEventTitle, setNewEventTitle] = useState("");
+  const [newEventDescription, setNewEventDescription] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
   const [canvasURL, setCanvasURL] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleOpenModal = () => setModalOpen(true);
+
   const handleCloseModal = () => setModalOpen(false);
+
   const handleEventClick = (info) => {
     setEventDetailsOpen(true);
     setSelectedEvent(info.event);
   };
+
   const handleCloseEventDetailsModal = () => {
     setEventDetailsOpen(false);
     setSelectedEvent(null);
   };
+
   const handleWeekendsToggle = () => setWeekendsVisible(!weekendsVisible);
+
+  const handleDateSelect = (selectInfo) => {
+    // Open modal for new event
+    setModalOpen(true);
+
+    // Set initial event data based on selection
+    setNewEventTitle("");
+    setNewEventDate(selectInfo.startStr); // set start date
+
+    // Optionally, if you want to handle end date
+    // setNewEventEndDate(selectInfo.endStr);
+  };
 
   const handleEventAdd = () => {
     if (newEventTitle && newEventDate) {
       const newEventId = createEventId();
       setCurrentEvents((prevEvents) => [
         ...prevEvents,
-        { id: newEventId, title: newEventTitle, date: newEventDate },
+        {
+          id: newEventId,
+          description: newEventDescription,
+          title: newEventTitle,
+          date: newEventDate,
+        },
       ]);
       setModalOpen(false);
       setNewEventTitle("");
       setNewEventDate("");
     }
+  };
+
+  const handleEventDrop = (dropInfo) => {
+    // Update event in the state
+    const updatedEvents = currentEvents.map((event) => {
+      if (event.id === dropInfo.event.id) {
+        return {
+          ...event,
+          start: dropInfo.event.start,
+          end: dropInfo.event.end,
+        };
+      }
+      return event;
+    });
+
+    setCurrentEvents(updatedEvents);
+
+    // Optionally, update the event's position in the backend
+    // updateEventInBackend(dropInfo.event);
+  };
+
+  const handleEventResize = (resizeInfo) => {
+    // Update event in the state
+    const updatedEvents = currentEvents.map((event) => {
+      if (event.id === resizeInfo.event.id) {
+        return {
+          ...event,
+          start: resizeInfo.event.start,
+          end: resizeInfo.event.end,
+        };
+      }
+      return event;
+    });
+
+    setCurrentEvents(updatedEvents);
+
+    // Optionally, you can also update this in the backend
+    // updateEventInBackend(resizeInfo.event);
   };
 
   const handleFetchCanvasEvents = async () => {
@@ -99,19 +159,29 @@ const Calendar = () => {
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           headerToolbar={{
-            left: "prev,next today",
+            left: "prev,next today, customButton",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
+          }}
+          customButtons={{
+            customButton: {
+              text: "Add Event",
+              click: () => {
+                handleOpenModal();
+              },
+            },
           }}
           initialView="dayGridMonth"
           selectable={true}
           selectMirror={true}
           dayMaxEvents={true}
           weekends={weekendsVisible}
-          events={currentEvents}
+          events={currentEvents} // Use a function or URL for dynamic event fetching
           eventContent={(eventInfo) => <EventContent eventInfo={eventInfo} />}
           eventClick={handleEventClick}
-          // You can dynamically change the calendar's height with state
+          select={handleDateSelect}
+          eventResize={handleEventResize}
+          eventDrop={handleEventDrop}
           height={"65vh"}
         />
         <EventModal
@@ -119,6 +189,8 @@ const Calendar = () => {
           handleCloseModal={handleCloseModal}
           newEventTitle={newEventTitle}
           setNewEventTitle={setNewEventTitle}
+          newEventDescription={newEventDescription}
+          setNewEventDescription={setNewEventDescription}
           newEventDate={newEventDate}
           setNewEventDate={setNewEventDate}
           handleEventAdd={handleEventAdd}
@@ -142,14 +214,6 @@ const Calendar = () => {
               width: "100%",
             }}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenModal}
-              sx={{ marginBottom: "10px" }}
-            >
-              Add Event
-            </Button>
             <TextField
               value={canvasURL}
               onChange={(e) => setCanvasURL(e.target.value)}
@@ -162,6 +226,7 @@ const Calendar = () => {
               disabled={loading}
               variant="contained"
               color="primary"
+              fullWidth
               sx={{ marginBottom: "10px" }}
             >
               Fetch Canvas Events

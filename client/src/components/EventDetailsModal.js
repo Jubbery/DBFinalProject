@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -7,28 +7,40 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
+import Markdown from "react-markdown";
 
 const EventDetailsModal = ({
   eventDetailsOpen,
   handleCloseEventDetailsModal,
   selectedEvent,
-}) => (
-  <Dialog open={eventDetailsOpen} onClose={handleCloseEventDetailsModal}>
-    <DialogTitle>Event Details</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
-        <strong>Title:</strong> {selectedEvent?.title}
-      </DialogContentText>
-      <DialogContentText>
-        <strong>Date:</strong> {selectedEvent?.start.toLocaleDateString()}
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={handleCloseEventDetailsModal} color="primary">
-        Close
-      </Button>
-    </DialogActions>
-  </Dialog>
-);
+}) => {
+  console.log("selectedEvent", selectedEvent);
+  return (
+    <Fragment>
+      <Dialog open={eventDetailsOpen} onClose={handleCloseEventDetailsModal}>
+        <DialogTitle>Event Details</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <strong>Title:</strong> {selectedEvent?.title}
+          </DialogContentText>
+          <DialogContentText>
+            <strong>Description:</strong>{" "}
+            <div>
+              <Markdown>{selectedEvent?.extendedProps.description}</Markdown>
+            </div>
+          </DialogContentText>
+          <DialogContentText>
+            <strong>Date:</strong> {selectedEvent?.start.toLocaleDateString()}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEventDetailsModal} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Fragment>
+  );
+};
 
 export default EventDetailsModal;

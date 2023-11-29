@@ -14,6 +14,8 @@ const EventModal = ({
   handleCloseModal,
   newEventTitle,
   setNewEventTitle,
+  newEventDescription,
+  setNewEventDescription,
   newEventDate,
   setNewEventDate,
   handleEventAdd,
@@ -25,14 +27,22 @@ const EventModal = ({
       <TextField
         autoFocus
         margin="dense"
-        label="Event Title"
+        label="Title"
         fullWidth
         value={newEventTitle}
         onChange={(e) => setNewEventTitle(e.target.value)}
       />
       <TextField
+        autoFocus
         margin="dense"
-        label="Event Date"
+        label="Description"
+        fullWidth
+        value={newEventDescription}
+        onChange={(e) => setNewEventDescription(e.target.value)}
+      />
+      <TextField
+        margin="dense"
+        label="Date"
         type="date"
         fullWidth
         value={newEventDate}
