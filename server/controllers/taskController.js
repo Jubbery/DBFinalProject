@@ -82,21 +82,17 @@ const createTask = async (req, res) => {
   // If deadline is not provided, set it to today's date
   if (!deadline) {
     let today = new Date();
-    deadline = today.toISOString().split('T')[0];
+    deadline = today.toISOString().split("T")[0];
   }
 
   // If task_status is not provided or is an integer, set it to "Not-Started"
-  if (!status || typeof status === 'number') {
-  status = "Not-Started";
-}
-  // If task_status is not provided, set it to "Not-Started"
-  if (!status) {
+  if (!status || typeof status === "number") {
     status = "Not-Started";
   }
 
   try {
     const newTask = await db.query(
-      "INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8) RETURNING *",
+      `INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8) RETURNING *`,
       [
         user_id,
         task_name,
@@ -117,24 +113,25 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   const { taskId } = req.params;
-  console.log('taskId:', taskId); // TESTING Print taskId to the console  
-  const { task_name, deadline, note, priority, task_status } = req.body;
+  console.log("taskId:", taskId); // TESTING Print taskId to the console
+  const { task_name, deadline, note, priority, task_status, task_type } =
+    req.body;
 
   // Print task_status to the console
-  console.log('task_name:', task_name); // TESTING Print task_name to the console
-  console.log('task_status:', task_status); // TESTING Print task_status to the console
+  console.log("task_name:", task_name); // TESTING Print task_name to the console
+  console.log("task_status:", task_status); // TESTING Print task_status to the console
+  console.log("priority:", priority); // TESTING Print task_status to the console
 
   // If deadline is not provided, set it to today's date
   if (!deadline) {
     let today = new Date();
-    deadline = today.toISOString().split('T')[0];
+    deadline = today.toISOString().split("T")[0];
   }
 
-  
   try {
     const updatedTask = await db.query(
-      "UPDATE Tasks SET task_name = $1, deadline = $2, note = $3, priority_level = $4, task_status = $5 WHERE task_id = $6 RETURNING *",
-      [task_name, deadline, note, priority, task_status, taskId]
+      "UPDATE Tasks SET task_name = $1, deadline = $2, note = $3, priority_level = $4, task_status = $5, task_type = $6 WHERE task_id = $7 RETURNING *",
+      [task_name, deadline, note, priority, task_status, task_type, taskId]
     );
 
     res.json(updatedTask.rows[0]);
@@ -142,8 +139,6 @@ const updateTask = async (req, res) => {
     console.error(err.message);
     res.status(500).send(`Server Error: ${err.message}`);
   }
-
-  
 };
 
 const deleteTask = async (req, res) => {
@@ -158,7 +153,6 @@ const deleteTask = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
-
 
 module.exports = {
   getAllTasksForUser,

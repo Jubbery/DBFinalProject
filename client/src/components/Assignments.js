@@ -1,15 +1,12 @@
 import React, { Fragment, useEffect, useState, useCallback } from "react";
-// import ListHeader from "./ListHeader";
-import ListItem from "./ListItem";
-// import { useUser } from "../utils/UserContext";
-import { Button } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import PlusIcon from "@mui/icons-material/Add";
 import FilterSelect from "./FilterSelect";
-import AddTaskModal from './TaskModal'; // Transfered to 
-
-
+import AddTaskModal from "./TaskModal"; // Transfered to
+import AssignmentListItem from "./ListItem";
 
 const Assignments = () => {
-  const [user_id] = useState(localStorage.getItem('uid')); // Get user_id from localStorage
+  const [user_id] = useState(localStorage.getItem("uid")); // Get user_id from localStorage
   const [myTasks, setTasks] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,7 +27,7 @@ const Assignments = () => {
 
   if (user_id) {
     // TESTING user logging
-    console.log("TESTING: Current User:", user_id, localStorage.getItem('uid'));
+    console.log("TESTING: Current User:", user_id, localStorage.getItem("uid"));
   } else {
     console.log("TESTING: No Current User:", user_id);
   }
@@ -98,39 +95,43 @@ const Assignments = () => {
   const editTask = async (taskId, updatedTask) => {
     try {
       const response = await fetch(`http://localhost:8000/tasks/${taskId}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedTask),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(`Error during task update: ${errorData.message}`);
       }
-  
+
       const taskData = await response.json();
-      setTasks(prevTasks => prevTasks.map(task => task.task_id === taskId ? taskData : task));
-  
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => (task.task_id === taskId ? taskData : task))
+      );
+
       closeModal();
     } catch (error) {
       console.error(error.message);
     }
   };
-  
+
   const deleteTask = async (taskId) => {
     try {
       const response = await fetch(`http://localhost:8000/tasks/${taskId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(`Error during task deletion: ${errorData.message}`);
       }
-  
-      setTasks(prevTasks => prevTasks.filter(task => task.task_id !== taskId));
+
+      setTasks((prevTasks) =>
+        prevTasks.filter((task) => task.task_id !== taskId)
+      );
     } catch (error) {
       console.error(error.message);
     }
@@ -144,29 +145,48 @@ const Assignments = () => {
     getData();
   }, [getData]); // Dependency array for useEffect
 
-
-  
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <Fragment>
       <div className="list-header">
-        <h1>📚 Class Assignments List</h1>
-        <div className="button-container">
-          
-          <Button  className="add-task-button" onClick={openModal}>Add Task</Button>
-          <AddTaskModal isOpen={modalIsOpen} onRequestClose={closeModal} openModal={openModal} closeModal={closeModal} />
-
-        </div>
-        
-        <div className="filter-container">
-          <FilterSelect onChange={handleFilterChange} />
-        </div>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+            padding: "0 16px",
+            marginBottom: "16px",
+          }}
+        >
+          <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
+            📚 Class Assignments List
+          </Typography>
+          <Box sx={{ display: "flex", flexGrow: 3, height: "contain" }}>
+            <Button
+              variant="contained"
+              onClick={openModal}
+              sx={{ width: "30%", marginRight: "8px" }}
+              startIcon={<PlusIcon />}
+            >
+              Add Task
+            </Button>
+            <AddTaskModal isOpen={modalIsOpen} onRequestClose={closeModal} />
+            <FilterSelect onChange={handleFilterChange} />
+          </Box>
+        </Box>
       </div>
+
       {myTasks &&
         myTasks.map((myTask) => (
-          <ListItem key={myTask.task_id} myTask={myTask} onEdit={editTask} onDelete={deleteTask}/>
+          <AssignmentListItem
+            key={myTask.task_id}
+            myTask={myTask}
+            onEdit={editTask}
+            onDelete={deleteTask}
+          />
         ))}
     </Fragment>
   );

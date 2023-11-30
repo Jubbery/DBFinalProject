@@ -13,6 +13,32 @@ const convertJCalToJSON = (jCal) => {
   return jsonEvent;
 };
 
+const categorizeTaskType = (title, description) => {
+  const taskKeywords = {
+    Exam: ["exam", "test", "quiz"],
+    Assignment: ["assignment", "homework", "worksheet"],
+    Project: ["project", "presentation", "group work"],
+  };
+
+  // Function to check if the text contains any of the keywords
+  const containsKeyword = (text, keywords) => {
+    return keywords.some((keyword) => text.toLowerCase().includes(keyword));
+  };
+
+  // Check title and description for each type
+  for (const [type, keywords] of Object.entries(taskKeywords)) {
+    if (
+      containsKeyword(title, keywords) ||
+      containsKeyword(description, keywords)
+    ) {
+      return type;
+    }
+  }
+
+  // Default type if no keywords found
+  return "Assignment";
+};
+
 const storeCanvasEvents = async (req, res) => {
   const user_id = jwt.verify(
     req.header("Authorization").split(" ")[1],
@@ -49,19 +75,32 @@ const storeCanvasEvents = async (req, res) => {
     // Insert each event into the CanvasEvents table
     for (const event of events) {
       // console.log("Inserting event:", Object.keys(event.component.jCal));
+      // const taskType = categorizeTaskType(event.summary, event.description);
       // Modify this query to match your Canvas event object structure
       await db.query(
         `
         INSERT INTO CanvasEvents 
-        (event_id, dtstamp, user_id, dtstart, description, summary, url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        ON CONFLICT (event_id) DO UPDATE 
-        SET dtstamp = EXCLUDED.dtstamp,
-            user_id = EXCLUDED.user_id,
-            dtstart = EXCLUDED.dtstart,
-            description = EXCLUDED.description,
-            summary = EXCLUDED.summary,
-            url = EXCLUDED.url
+          (event_id, dtstamp, user_id, dtstart, description, summary, url, task_type)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 
+              CASE 
+                WHEN LOWER($6) LIKE '%exam%' OR LOWER($5) LIKE '%exam%' THEN 'Exam'
+                WHEN LOWER($6) LIKE '%test%' OR LOWER($5) LIKE '%test%' THEN 'Exam'
+                WHEN LOWER($6) LIKE '%quiz%' OR LOWER($5) LIKE '%quiz%' THEN 'Exam'
+                WHEN LOWER($6) LIKE '%assignment%' OR LOWER($5) LIKE '%assignment%' THEN 'Assignment'
+                WHEN LOWER($6) LIKE '%homework%' OR LOWER($5) LIKE '%homework%' THEN 'Assignment'
+                WHEN LOWER($6) LIKE '%worksheet%' OR LOWER($5) LIKE '%worksheet%' THEN 'Assignment'
+                WHEN LOWER($6) LIKE '%project%' OR LOWER($5) LIKE '%project%' THEN 'Project'
+                WHEN LOWER($6) LIKE '%presentation%' OR LOWER($5) LIKE '%presentation%' THEN 'Project'
+                WHEN LOWER($6) LIKE '%group work%' OR LOWER($5) LIKE '%group work%' THEN 'Project'
+                ELSE 'Assignment' -- Default type if no keywords found
+              END::task_type_enum)
+          ON CONFLICT (event_id) DO UPDATE 
+          SET dtstamp = EXCLUDED.dtstamp,
+              user_id = EXCLUDED.user_id,
+              dtstart = EXCLUDED.dtstart,
+              description = EXCLUDED.description,
+              summary = EXCLUDED.summary,
+              url = EXCLUDED.url
       `,
         [
           event.uid,
