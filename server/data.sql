@@ -16,7 +16,8 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Tasks (
-  task_id TEXT PRIMARY KEY,
+  task_id SERIAL PRIMARY KEY,
+  event_id TEXT REFERENCES CanvasEvents(event_id) ON DELETE CASCADE DEFAULT NULL,
   user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
   task_name VARCHAR(250) NOT NULL,
   start_date DATE,
@@ -35,7 +36,8 @@ CREATE TABLE CanvasEvents (
   dtstart TEXT,
   description TEXT,
   summary TEXT,
-  url TEXT
+  url TEXT,
+  task_type task_type_enum
 );
 
 CREATE TABLE Tag (
@@ -74,12 +76,15 @@ CREATE TABLE Courses (
 CREATE OR REPLACE FUNCTION trigger_add_event_to_task()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM Tasks WHERE task_id = NEW.event_id) THEN
-    -- If no task with this task_id exists, insert a new task
-    INSERT INTO Tasks (task_id, user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type)
-    VALUES (NEW.event_id, NEW.user_id, NEW.summary, NEW.dtstamp::DATE, NEW.dtstart::DATE, 'Medium', 'Not-Started', NOW(), NEW.description, 'Assignment');
+  -- Check if a task associated with this event_id already exists --
+  IF NOT EXISTS (SELECT 1 FROM Tasks WHERE event_id = NEW.event_id) THEN
+    -- If no task with this event_id exists, insert a new task --
+    INSERT INTO Tasks 
+      (event_id, user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type)
+    VALUES 
+      (NEW.event_id, NEW.user_id, NEW.summary, NEW.dtstamp::DATE, NEW.dtstart::DATE, 'Medium', 'Not-Started', NOW(), NEW.description, NEW.task_type);
   ELSE
-    -- If a task with this task_id already exists, update that task
+    -- If a task with this event_id already exists, update that task --
     UPDATE Tasks SET
       user_id = NEW.user_id,
       task_name = NEW.summary,
@@ -87,10 +92,9 @@ BEGIN
       deadline = NEW.dtstart::DATE,
       priority_level = 'Medium',
       task_status = 'Not-Started',
-      created_at = NOW(),
       note = NEW.description,
-      task_type = 'Assignment'
-    WHERE task_id = NEW.event_id;
+      task_type = NEW.task_type
+    WHERE event_id = NEW.event_id;
   END IF;
   RETURN NEW;
 END;
