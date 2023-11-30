@@ -1,5 +1,4 @@
-
-CREATE DATABASE todoapp;
+CREATE DATABASE postgres;
 
 CREATE TYPE priority_enum AS ENUM ('High', 'Medium', 'Low');
 CREATE TYPE task_status_enum AS ENUM ('Not-Started', 'In-Progress', 'Completed');
@@ -13,6 +12,17 @@ CREATE TABLE Users (
   email VARCHAR(250) UNIQUE NOT NULL,
   hashed_pass CHAR(60) NOT NULL,
   canvasurl VARCHAR(250) DEFAULT NULL
+);
+
+CREATE TABLE CanvasEvents (
+  event_id TEXT PRIMARY KEY,
+  dtstamp TEXT,
+  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
+  dtstart TEXT,
+  description TEXT,
+  summary TEXT,
+  url TEXT,
+  task_type task_type_enum
 );
 
 CREATE TABLE Tasks (

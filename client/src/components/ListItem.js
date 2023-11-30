@@ -1,6 +1,5 @@
 import React, { Fragment, useState } from "react";
 import DOMPurify from "dompurify";
-import TickIcon from "./TickIcon";
 import {
   Accordion,
   AccordionSummary,
