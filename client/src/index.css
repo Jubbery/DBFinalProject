@@ -57,6 +57,10 @@ body {
   border-bottom: rgb(42, 42, 42) 1px solid;
 }
 
+.task-info {
+  margin: 10px;
+}
+
 .add-task-button {
   background-color: #4CAF50; /* green */
   border: none;

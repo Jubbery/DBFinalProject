@@ -73,11 +73,17 @@ const createTask = async (req, res) => {
     task_name,
     start_date,
     deadline,
-    priority_level,
+    priority,
     status,
     note,
     task_type,
   } = req.body;
+
+  // If task_status is not provided, set it to "Not-Started"
+  if (!task_status) {
+    task_status = "Not-Started";
+  }
+
   try {
     const newTask = await db.query(
       "INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8) RETURNING *",
@@ -86,7 +92,7 @@ const createTask = async (req, res) => {
         task_name,
         start_date,
         deadline,
-        priority_level,
+        priority,
         status,
         note,
         task_type,
@@ -99,6 +105,45 @@ const createTask = async (req, res) => {
   }
 };
 
+const updateTask = async (req, res) => {
+  const { taskId } = req.params;
+  const { task_name, deadline, note, priority, task_status } = req.body;
+
+  // If deadline is not provided, set it to today's date
+  if (!deadline) {
+    let today = new Date();
+    deadline = today.toISOString().split('T')[0];
+  }
+
+  try {
+    const updatedTask = await db.query(
+      "UPDATE Tasks SET task_name = $1, deadline = $2, note = $3, priority_level = $4, task_status = $5 WHERE task_id = $5 RETURNING *",
+      [task_name, deadline, note, priority, taskId, task_status]
+    );
+
+    res.json(updatedTask.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(`Server Error: ${err.message}`);
+  }
+
+  
+};
+
+const deleteTask = async (req, res) => {
+  const { taskId } = req.params;
+
+  try {
+    await db.query("DELETE FROM Tasks WHERE task_id = $1", [taskId]);
+
+    res.json({ message: "Task deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+
 module.exports = {
   getAllTasksForUser,
   orderTasksByDeadline,
@@ -106,4 +151,6 @@ module.exports = {
   orderByTaskPriorityLevel,
   showTasksByAssignmentType,
   createTask,
+  updateTask,
+  deleteTask,
 };

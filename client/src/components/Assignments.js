@@ -95,6 +95,47 @@ const Assignments = () => {
     }
   }, []);
 
+  const editTask = async (taskId, updatedTask) => {
+    try {
+      const response = await fetch(`http://localhost:8000/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTask),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Error during task update: ${errorData.message}`);
+      }
+  
+      const taskData = await response.json();
+      setTasks(prevTasks => prevTasks.map(task => task.task_id === taskId ? taskData : task));
+  
+      closeModal();
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  
+  const deleteTask = async (taskId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Error during task deletion: ${errorData.message}`);
+      }
+  
+      setTasks(prevTasks => prevTasks.filter(task => task.task_id !== taskId));
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
   useEffect(() => {
     fetchDataBasedOnFilter("order/deadline"); // Default filter
   }, [fetchDataBasedOnFilter]);
@@ -103,6 +144,8 @@ const Assignments = () => {
     getData();
   }, [getData]); // Dependency array for useEffect
 
+
+  
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
@@ -123,7 +166,7 @@ const Assignments = () => {
       </div>
       {myTasks &&
         myTasks.map((myTask) => (
-          <ListItem key={myTask.task_id} myTask={myTask} />
+          <ListItem key={myTask.task_id} myTask={myTask} onEdit={editTask} onDelete={deleteTask}/>
         ))}
     </Fragment>
   );

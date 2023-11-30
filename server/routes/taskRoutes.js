@@ -8,7 +8,9 @@ router.get("/order/deadline", taskController.orderTasksByDeadline);
 router.get("/courses", taskController.showTasksAssociatedWithCourses);
 router.get("/order/priority", taskController.orderByTaskPriorityLevel);
 router.get("/type/:taskType", taskController.showTasksByAssignmentType);
-router.post("/", taskController.createTask);
+router.post("/", taskController.createTask); // Create a task
+router.put("/:taskId", taskController.updateTask); // Update a task
+router.delete("/:taskId", taskController.deleteTask);  // Delete a task
 
 // Export the router
 module.exports = router;
