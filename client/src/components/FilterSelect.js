@@ -4,11 +4,8 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
-const FilterSelect = ({ onChange }) => {
-  const [filter, setFilter] = useState("");
-
+const FilterSelect = ({ filterValue, onChange }) => {
   const handleChange = (event) => {
-    setFilter(event.target.value);
     onChange(event.target.value);
   };
 
@@ -18,7 +15,7 @@ const FilterSelect = ({ onChange }) => {
       <Select
         labelId="filter-select-label"
         id="filter-select"
-        value={filter}
+        value={filterValue}
         label="Filter"
         onChange={handleChange}
       >

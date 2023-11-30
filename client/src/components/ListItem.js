@@ -56,18 +56,24 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
 
   let date = new Date(myTask.deadline);
 
-  function replaceTextWithLink(inputString) {
-    if (!inputString || inputString.length === 0) return;
-    // Eegular expression pattern for markdown links
+  function findLinksInText(inputString) {
+    if (!inputString || inputString.length === 0) return [];
+
+    // Regular expression pattern for markdown links
     const pattern = /\[([^\]]*)\] \(([^)]*)\)/g;
 
-    // Replace all occurrences of the markdown links with a link tag
-    const result = inputString.replace(
-      pattern,
-      '<a href="$2" target="_blank">$1</a>'
-    );
+    const links = [];
 
-    return <div dangerouslySetInnerHTML={{ __html: result }} />;
+    // Use matchAll to find all occurrences of the pattern
+    const matches = inputString.matchAll(pattern);
+
+    for (const match of matches) {
+      const linkText = match[1];
+      const linkUrl = match[2];
+      links.push({ text: linkText, url: linkUrl });
+    }
+
+    return links;
   }
 
   return (
@@ -94,14 +100,45 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
                 }
                 secondary={
                   <Fragment>
+                    <Box sx={{ mt: 1, ml: 2 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.primary"
+                      >
+                        {date.toDateString() + " " + date.toLocaleTimeString()}
+                      </Typography>
+                    </Box>
+                  </Fragment>
+                }
+              />
+            </ListItem>
+            <Divider variant="fullWidth" component="li" />
+            <ListItem alignItems="flex-start">
+              <ListItemText
+                primary={
+                  <Fragment>
                     <Typography
-                      sx={{ display: "inline", marginLeft: "2rem" }}
+                      sx={{ display: "inline" }}
                       component="span"
-                      variant="body2"
+                      variant="h5"
                       color="text.primary"
                     >
-                      {date.toDateString() + " " + date.toLocaleTimeString()}
+                      Type:
                     </Typography>
+                  </Fragment>
+                }
+                secondary={
+                  <Fragment>
+                    <Box sx={{ mt: 1, ml: 2 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.primary"
+                      >
+                        {myTask.task_type}
+                      </Typography>
+                    </Box>
                   </Fragment>
                 }
               />
@@ -119,15 +156,50 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
                   </Typography>
                 }
                 secondary={
-                  <Box sx={{ mt: 1, ml: 2 }}>
+                  <Fragment>
+                    <Box sx={{ mt: 1, ml: 2 }}>
+                      <TextareaAutosize
+                        maxRows={20}
+                        placeholder="Note"
+                        disabled
+                        name="note"
+                        value={myTask.note ? myTask.note : "No Note"}
+                        style={{
+                          width: "100%",
+                          marginTop: "8px",
+                          overflow: "scroll",
+                          resize: "vertical",
+                          overflowX: "hidden",
+                        }}
+                      />
+                    </Box>
                     <Typography
                       component="span"
-                      variant="body2"
+                      variant="h5"
                       color="text.primary"
                     >
-                      {replaceTextWithLink(myTask.note)}
+                      Links:
                     </Typography>
-                  </Box>
+                    <Box sx={{ mt: 1, ml: 2 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.primary"
+                      >
+                        {findLinksInText(myTask.note).map((link, index) => (
+                          <div key={index}>
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {link.text}
+                            </a>
+                          </div>
+                        ))}
+                      </Typography>
+                    </Box>
+                  </Fragment>
                 }
               />
             </ListItem>
@@ -148,14 +220,15 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
                 }
                 secondary={
                   <Fragment>
-                    <Typography
-                      sx={{ display: "inline", marginLeft: "2rem" }}
-                      component="span"
-                      variant="body2"
-                      color="text.primary"
-                    >
-                      {myTask.priority_level}
-                    </Typography>
+                    <Box sx={{ mt: 1, ml: 2 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.primary"
+                      >
+                        {myTask.priority_level}
+                      </Typography>
+                    </Box>
                   </Fragment>
                 }
               />
@@ -177,14 +250,15 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
                 }
                 secondary={
                   <Fragment>
-                    <Typography
-                      sx={{ display: "inline", marginLeft: "2rem" }}
-                      component="span"
-                      variant="body2"
-                      color="text.primary"
-                    >
-                      {myTask.task_status}
-                    </Typography>
+                    <Box sx={{ mt: 1, ml: 2 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.primary"
+                      >
+                        {myTask.task_status}
+                      </Typography>
+                    </Box>
                   </Fragment>
                 }
               />
@@ -244,21 +318,27 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
               margin="normal"
             />
             <TextareaAutosize
-              minRows={3}
+              maxRows={10}
               placeholder="Note"
               name="note"
               value={newTask.note}
               onChange={handleChange}
-              style={{ width: "100%", marginTop: "8px" }}
+              style={{
+                width: "100%",
+                marginTop: "8px",
+                overflow: "scroll",
+                resize: "vertical",
+                overflowX: "hidden",
+              }}
             />
             <FormControl fullWidth margin="normal">
               <InputLabel id="priority-select-label">Priority</InputLabel>
               <Select
                 labelId="priority-select-label"
                 id="priority-select"
-                value={newTask.priority}
+                value={newTask.priority_level}
                 label="Priority"
-                name="priority"
+                name="priority_level"
                 onChange={handleChange}
               >
                 <MenuItem value="High">High</MenuItem>
@@ -279,6 +359,21 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
                 <MenuItem value="In-Progress">In-Progress</MenuItem>
                 <MenuItem value="Not-Started">Not-Started</MenuItem>
                 <MenuItem value="Completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="task-type-select-label">Task Type</InputLabel>
+              <Select
+                labelId="status-select-label"
+                id="status-select"
+                value={newTask.task_type}
+                label="Task Type"
+                name="task_type"
+                onChange={handleChange}
+              >
+                <MenuItem value="Assignment">Assignment</MenuItem>
+                <MenuItem value="Exam">Exam</MenuItem>
+                <MenuItem value="Project">Project</MenuItem>
               </Select>
             </FormControl>
             <Button type="submit" variant="contained" sx={{ mt: 2, mr: 1 }}>

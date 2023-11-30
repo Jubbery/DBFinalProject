@@ -6,16 +6,12 @@ import AddTaskModal from "./TaskModal"; // Transfered to
 import AssignmentListItem from "./ListItem";
 
 const Assignments = () => {
-  const [user_id] = useState(localStorage.getItem("uid")); // Get user_id from localStorage
   const [myTasks, setTasks] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  // const [showModal, setShowModal] = useState(false);
-  // const [taskName, setTaskName] = useState('');
-  // const [deadline, setDeadline] = useState('');
-  // const [note, setNote] = useState('');
-  // const [priority, setPriority] = useState('Medium'); // default to Medium
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [currentFilter, setCurrentFilter] = useState("order/deadline");
+  let runAgainFlag = false;
 
   const openModal = () => {
     setIsOpen(true);
@@ -25,15 +21,13 @@ const Assignments = () => {
     setIsOpen(false);
   };
 
-  if (user_id) {
-    // TESTING user logging
-    console.log("TESTING: Current User:", user_id, localStorage.getItem("uid"));
-  } else {
-    console.log("TESTING: No Current User:", user_id);
-  }
+  const onTaskAdded = () => {
+    closeModal();
+    fetchDataBasedOnFilter(currentFilter);
+  };
 
   const handleFilterChange = (selectedFilter) => {
-    fetchDataBasedOnFilter(selectedFilter);
+    setCurrentFilter(selectedFilter);
   };
 
   // NEW CODE using JWT:
@@ -82,10 +76,10 @@ const Assignments = () => {
         throw new Error(`Error fetching tasks: ${response.statusText}`);
       }
       const json = await response.json();
-      console.log("TESTING: Tasks fetched successfully:", json);
+      console.log(`Tasks fetched successfully by ${filterType}`);
       setTasks(json);
     } catch (err) {
-      console.error("TESTING: Error fetching tasks:", err);
+      console.error("Error fetching tasks");
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -107,10 +101,8 @@ const Assignments = () => {
         throw new Error(`Error during task update: ${errorData.message}`);
       }
 
-      const taskData = await response.json();
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.task_id === taskId ? taskData : task))
-      );
+      fetchDataBasedOnFilter(currentFilter);
+      console.log("Task edited successfully");
 
       closeModal();
     } catch (error) {
@@ -128,18 +120,16 @@ const Assignments = () => {
         const errorData = await response.json();
         throw new Error(`Error during task deletion: ${errorData.message}`);
       }
-
-      setTasks((prevTasks) =>
-        prevTasks.filter((task) => task.task_id !== taskId)
-      );
+      fetchDataBasedOnFilter(currentFilter);
+      console.log("TESTING: Task deleted successfully");
     } catch (error) {
       console.error(error.message);
     }
   };
 
   useEffect(() => {
-    fetchDataBasedOnFilter("order/deadline"); // Default filter
-  }, [fetchDataBasedOnFilter]);
+    fetchDataBasedOnFilter(currentFilter); // Default filter
+  }, [currentFilter, runAgainFlag]);
 
   useEffect(() => {
     getData();
@@ -173,8 +163,15 @@ const Assignments = () => {
             >
               Add Task
             </Button>
-            <AddTaskModal isOpen={modalIsOpen} onRequestClose={closeModal} />
-            <FilterSelect onChange={handleFilterChange} />
+            <AddTaskModal
+              isOpen={modalIsOpen}
+              onRequestClose={closeModal}
+              taskAdded={onTaskAdded}
+            />
+            <FilterSelect
+              filterValue={currentFilter}
+              onChange={handleFilterChange}
+            />
           </Box>
         </Box>
       </div>
