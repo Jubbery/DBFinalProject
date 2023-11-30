@@ -1,12 +1,12 @@
-const pool = require("../db");
+const db = require("../db");
+const jwt = require("jsonwebtoken");
 
 const getAllTasksForUser = async (req, res) => {
   const { user_id } = req.params;
   try {
-    const userTasks = await pool.query(
-      "SELECT * FROM Tasks WHERE user_id = $1",
-      [user_id]
-    );
+    const userTasks = await db.query("SELECT * FROM Tasks WHERE user_id = $1", [
+      user_id,
+    ]);
     res.json(userTasks.rows);
   } catch (err) {
     console.error(err.message);
@@ -15,10 +15,13 @@ const getAllTasksForUser = async (req, res) => {
 };
 
 const orderTasksByDeadline = async (req, res) => {
-  const { user_id } = req.params; // Extract the user_id from the request parameters
+  const token = req.header("Authorization").split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user_id = decoded.user_id;
+
   try {
     // Query table for tasks associated with the user_id, ordered by the deadline
-    const tasks = await pool.query(
+    const tasks = await db.query(
       "SELECT * FROM Tasks WHERE user_id = $1 ORDER BY deadline",
       [user_id]
     );
@@ -31,7 +34,7 @@ const orderTasksByDeadline = async (req, res) => {
 
 const showTasksAssociatedWithCourses = async (req, res) => {
   try {
-    const tasks = await pool.query(
+    const tasks = await db.query(
       "SELECT t.* FROM Tasks t JOIN TaskTag tt ON t.task_id = tt.task_id JOIN Tag ta ON tt.tag_name = ta.tag_name JOIN Courses c ON ta.course_id = c.course_id"
     );
     res.json(tasks.rows);
@@ -43,9 +46,7 @@ const showTasksAssociatedWithCourses = async (req, res) => {
 
 const orderByTaskPriorityLevel = async (req, res) => {
   try {
-    const tasks = await pool.query(
-      "SELECT * FROM Tasks ORDER BY priority_level"
-    );
+    const tasks = await db.query("SELECT * FROM Tasks ORDER BY priority_level");
     res.json(tasks.rows);
   } catch (err) {
     console.error(err.message);
@@ -56,7 +57,7 @@ const orderByTaskPriorityLevel = async (req, res) => {
 const showTasksByAssignmentType = async (req, res) => {
   const { taskType } = req.params;
   try {
-    const tasks = await pool.query("SELECT * FROM Tasks WHERE task_type = $1", [
+    const tasks = await db.query("SELECT * FROM Tasks WHERE task_type = $1", [
       taskType,
     ]);
     res.json(tasks.rows);
@@ -78,7 +79,7 @@ const createTask = async (req, res) => {
     task_type,
   } = req.body;
   try {
-    const newTask = await pool.query(
+    const newTask = await db.query(
       "INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, status, created_at, note, task_type) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8) RETURNING *",
       [
         user_id,

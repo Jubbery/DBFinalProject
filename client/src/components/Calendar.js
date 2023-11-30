@@ -110,21 +110,44 @@ const Calendar = () => {
     if (!canvasURL) return;
     setLoading(true);
     try {
-      const response = await fetch(
+      const fetchResponse = await fetch(
         "http://localhost:8000/events/fetchCanvasEvents",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ canvasURL: canvasURL }),
         }
       );
-      const data = await response.json();
-      setCurrentEvents((prevEvents) => [...prevEvents, ...data.events]);
-      console.log(data.events);
+      if (!fetchResponse.ok) {
+        throw new Error(
+          `Error fetching Canvas events: ${fetchResponse.statusText}`
+        );
+      }
+      const fetchData = await fetchResponse.json();
+      setCurrentEvents((prevEvents) => [...prevEvents, ...fetchData.events]);
+
+      // Send events to db
+      const storeResponse = await fetch(
+        "http://localhost:8000/events/storeCanvasEvents",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (!storeResponse.ok) {
+        throw new Error(
+          `Error storing Canvas events: ${storeResponse.statusText}`
+        );
+      }
+      console.log("Canvas events stored successfully");
     } catch (error) {
-      console.error("Error fetching Canvas events:", error);
+      console.error("Error in fetching/storing Canvas events:", error);
     } finally {
       setLoading(false);
     }

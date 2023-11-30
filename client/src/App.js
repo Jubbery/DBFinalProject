@@ -9,6 +9,7 @@ import Profile from "./components/Profile";
 import Login from "./components/Login";
 import Debug from "./components/debug";
 import { UserProvider } from "./utils/UserContext";
+import Logout from "./components/Logout.js";
 
 const App = () => {
   // Hard coded for now
@@ -24,8 +25,10 @@ const App = () => {
           <div className="body">
             <Routes>
               <Route
-                path="/welcome"
-                element={signedIn ? <Signup /> : <Assignments />}
+                path="/signup"
+                element={
+                  localStorage.getItem("token") ? <Signup /> : <Assignments />
+                }
               />
               <Route path="/assignments" element={<Assignments />} />
               <Route path="/calendar" element={<Calendar />} />
@@ -33,6 +36,7 @@ const App = () => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/login" element={<Login />} />
               <Route path="/debug" element={<Debug />} />
+              <Route path="/logout" element={<Logout />} />
               {/* <Route path="/" element={< />} /> */}
             </Routes>
           </div>

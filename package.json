@@ -1,0 +1,11 @@
+{
+  "name": "db_final_reactapp",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "if-env TYPE=server && (cd server && npm install && npm run build) || (cd client && npm install && npm run build)",
+    "server": "node ./server/server.js",
+    "client": "cd client && npm start",
+    "start": "if-env TYPE=server && npm run server || npm run client"
+  }
+}
