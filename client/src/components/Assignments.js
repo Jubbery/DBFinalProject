@@ -14,6 +14,8 @@ const Assignments = () => {
   const [taskName, setTaskName] = useState('');
   const [deadline, setDeadline] = useState('');
   const [note, setNote] = useState('');
+  const [priority, setPriority] = useState('Medium'); // default to Medium
+
 
   if (user_id) {
     // TESTING user logging
@@ -114,6 +116,9 @@ const Assignments = () => {
       case 'note':
         setNote(event.target.value);
         break;
+      case 'priority':
+        setPriority(event.target.value);
+        break;
       default:
         break;
     }
@@ -127,6 +132,7 @@ const Assignments = () => {
       deadline: deadline,
       note: note,
       user_id: localStorage.getItem('uid'),
+      priority: priority,
     };
 
     console.log("current user id:", localStorage.getItem('uid')); // TESTING current user id
@@ -161,25 +167,35 @@ const Assignments = () => {
         <h1>📚 Class Assignments List</h1>
         <div className="button-container">
 
-          <Button onClick={openModal}>Add New Task</Button> 
-
+          <Button className="add-task-button" onClick={openModal}>Add New Task</Button>
+           
           {showModal && (
-            <div className="modal">
+            <div className="addtask-modal">
               <div className="modal-content">
                 <span className="close-button" onClick={closeModal}>&times;</span>
                 <form onSubmit={addTask}>
+                  {/* THE SUBMISSIONS FOR OUR MODAL BELOw */}
                   <label>
                     Task name:
-                    <input type="text" name="taskName" value={taskName} onChange={handleChange} />
+                    <input className="input-field" type="text" name="taskName" value={taskName} onChange={handleChange} />
                   </label>
                   <label>
                     Deadline:
-                    <input type="date" name="deadline" value={deadline} onChange={handleChange} />
+                    <input className="input-field" type="date" name="deadline" value={deadline} onChange={handleChange} />
                   </label>
                   <label>
                     Note:
-                    <textarea name="note" value={note} onChange={handleChange} />
+                    <textarea className="input-field" name="note" value={note} onChange={handleChange} />
                   </label>
+                  <label>
+                    Priority:
+                    <select className="input-field" name="priority" value={priority} onChange={handleChange}>
+                      <option value="High">High</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Low">Low</option>
+                    </select>
+                  </label>
+
                   <input type="submit" value="Add Task" />
                 </form>
               </div>
