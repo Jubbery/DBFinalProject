@@ -35,7 +35,7 @@ CREATE TABLE CanvasEvents (
   dtstart TEXT,
   description TEXT,
   summary TEXT,
-  url TEXT,
+  url TEXT
 );
 
 CREATE TABLE Tag (
