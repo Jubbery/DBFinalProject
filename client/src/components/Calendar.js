@@ -116,6 +116,7 @@ const Calendar = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ canvasURL: canvasURL }),
         }
@@ -128,16 +129,15 @@ const Calendar = () => {
       const fetchData = await fetchResponse.json();
       setCurrentEvents((prevEvents) => [...prevEvents, ...fetchData.events]);
 
-      // Now send these events to your server for storage
+      // Send events to db
       const storeResponse = await fetch(
         "http://localhost:8000/events/storeCanvasEvents",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // if authentication is required
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({ events: fetchData.events }),
         }
       );
       if (!storeResponse.ok) {

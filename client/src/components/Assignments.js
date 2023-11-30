@@ -3,6 +3,7 @@ import React, { Fragment, useEffect, useState, useCallback } from "react";
 import ListItem from "./ListItem";
 // import { useUser } from "../utils/UserContext";
 import { Button } from "@mui/material";
+import FilterSelect from "./FilterSelect";
 
 const Assignments = () => {
   const [user_id] = useState(localStorage.getItem('uid')); // Get user_id from localStorage
@@ -20,6 +21,10 @@ const Assignments = () => {
   } else {
     console.log("TESTING: No Current User:", user_id);
   }
+
+  const handleFilterChange = (selectedFilter) => {
+    fetchDataBasedOnFilter(selectedFilter);
+  };
 
   // NEW CODE using JWT:
   const getData = useCallback(async () => {
@@ -49,6 +54,37 @@ const Assignments = () => {
       setIsLoading(false);
     }
   }, []);
+
+  const fetchDataBasedOnFilter = useCallback(async (filterType) => {
+    setIsLoading(true);
+    setError(null);
+    const token = localStorage.getItem("token");
+    const url = `http://localhost:8000/tasks/${filterType}`;
+
+    try {
+      console.log("TESTING: Fetching tasks...");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching tasks: ${response.statusText}`);
+      }
+      const json = await response.json();
+      console.log("TESTING: Tasks fetched successfully:", json);
+      setTasks(json);
+    } catch (err) {
+      console.error("TESTING: Error fetching tasks:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDataBasedOnFilter("order/deadline"); // Default filter
+  }, [fetchDataBasedOnFilter]);
 
   useEffect(() => {
     getData();
@@ -150,6 +186,10 @@ const Assignments = () => {
             </div>
           )}
 
+        </div>
+        
+        <div className="filter-container">
+          <FilterSelect onChange={handleFilterChange} />
         </div>
       </div>
       {myTasks &&

@@ -16,7 +16,7 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Tasks (
-  task_id SERIAL PRIMARY KEY,
+  task_id TEXT PRIMARY KEY,
   user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
   task_name VARCHAR(250) NOT NULL,
   start_date DATE,
@@ -24,20 +24,18 @@ CREATE TABLE Tasks (
   priority_level priority_enum,
   task_status task_status_enum,
   created_at TIMESTAMP NOT NULL,
-  note VARCHAR(250),
+  note TEXT,
   task_type task_type_enum
 );
 
 CREATE TABLE CanvasEvents (
+  event_id TEXT PRIMARY KEY,
   dtstamp TEXT,
   user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
   dtstart TEXT,
-  class TEXT,
   description TEXT,
-  sequence INTEGER,
   summary TEXT,
   url TEXT,
-  x_alt_desc TEXT
 );
 
 CREATE TABLE Tag (
@@ -73,21 +71,20 @@ CREATE TABLE Courses (
   semester VARCHAR(250)
 );
 
--- Jack's Triggers
 CREATE OR REPLACE FUNCTION trigger_add_event_to_task()
 RETURNS TRIGGER AS $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM Tasks WHERE task_id = NEW.event_id) THEN
     -- If no task with this task_id exists, insert a new task
     INSERT INTO Tasks (task_id, user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type)
-    VALUES (NEW.event_id, NEW.user_id, NEW.summary, NEW.dtstart::DATE, NEW.dtstart::DATE + INTERVAL '1 day', 'Medium', 'Not-Started', NOW(), NEW.description, 'Assignment');
+    VALUES (NEW.event_id, NEW.user_id, NEW.summary, NEW.dtstamp::DATE, NEW.dtstart::DATE, 'Medium', 'Not-Started', NOW(), NEW.description, 'Assignment');
   ELSE
     -- If a task with this task_id already exists, update that task
     UPDATE Tasks SET
       user_id = NEW.user_id,
       task_name = NEW.summary,
-      start_date = NEW.dtstart::DATE,
-      deadline = NEW.dtstart::DATE + INTERVAL '1 day',
+      start_date = NEW.dtstamp::DATE,
+      deadline = NEW.dtstart::DATE,
       priority_level = 'Medium',
       task_status = 'Not-Started',
       created_at = NOW(),
@@ -103,6 +100,41 @@ CREATE TRIGGER add_event_to_task
 AFTER INSERT OR UPDATE ON CanvasEvents
 FOR EACH ROW
 EXECUTE FUNCTION trigger_add_event_to_task();
+
+-- Enabling Views for Tables:
+-- CREATE OR REPLACE FUNCTION current_user_id() RETURNS INTEGER AS $$
+-- BEGIN
+--     RETURN (SELECT user_id FROM Users WHERE username = current_user);
+-- END;
+-- $$ LANGUAGE plpgsql;
+
+-- ALTER TABLE Users ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE Tasks ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE CanvasEvents ENABLE ROW LEVEL SECURITY;
+
+-- CREATE POLICY select_own_record ON Users
+-- FOR SELECT
+-- USING (user_id = current_user_id());
+
+-- CREATE POLICY update_own_record ON Users
+-- FOR UPDATE
+-- USING (user_id = current_user_id());
+
+-- CREATE POLICY select_own_tasks ON Tasks
+-- FOR SELECT
+-- USING (user_id = current_user_id());
+
+-- CREATE POLICY modify_own_tasks ON Tasks
+-- FOR ALL
+-- USING (user_id = current_user_id());
+
+-- CREATE POLICY select_own_events ON CanvasEvents
+-- FOR SELECT
+-- USING (user_id = current_user_id());
+
+-- CREATE POLICY modify_own_events ON CanvasEvents
+-- FOR ALL
+-- USING (user_id = current_user_id());
 
 
 -- SIMULATED DATA FOR DATABASE 
