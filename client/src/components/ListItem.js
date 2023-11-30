@@ -1,6 +1,4 @@
 import TickIcon from './TickIcon'
-import ProgressBar from './ProgressBar'
-
 
 const ListItem = ({myTask}) => {
     return (
@@ -9,7 +7,6 @@ const ListItem = ({myTask}) => {
         <div className= "info-container">
           <TickIcon/>
           <p>{myTask.task_name}</p>
-          <ProgressBar/>
         </div>
 
         <div className= "button-container">
