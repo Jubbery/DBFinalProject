@@ -24,7 +24,7 @@ const style = {
   p: 4,
 };
 
-const AddTaskModal = ({ isOpen, onRequestClose }) => {
+const AddTaskModal = ({ isOpen, onRequestClose, taskAdded }) => {
   // const [user_id] = useState(localStorage.getItem('uid')); // Get user_id from localStorage
   // const [myTasks, setTasks] = useState([]);
   // const [isLoading, setIsLoading] = useState(false);
@@ -86,10 +86,7 @@ const AddTaskModal = ({ isOpen, onRequestClose }) => {
         throw new Error("Response was not ok");
       }
 
-      // const taskData = await response.json();
-      // setTasks(prevTasks => [...prevTasks, taskData]);
-
-      onRequestClose();
+      taskAdded();
     } catch (error) {
       console.error("Error during task creation:", error);
     }
