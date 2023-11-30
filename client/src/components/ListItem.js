@@ -72,7 +72,7 @@ return (
           <option value="Not-Started">Not-Started</option>
           <option value="Completed">Completed</option>
         </select>
-      </label>
+      </label>    
       <button onClick={handleSave}>Save</button>
     </form>
     <button onClick={() => setModalIsOpen(false)}>Close</button>

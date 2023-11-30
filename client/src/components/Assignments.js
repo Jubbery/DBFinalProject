@@ -155,7 +155,7 @@ const Assignments = () => {
         <h1>📚 Class Assignments List</h1>
         <div className="button-container">
           
-          <Button className="add-task-button" onClick={openModal}>Add New Task</Button>
+          <Button  className="add-task-button" onClick={openModal}>Add Task</Button>
           <AddTaskModal isOpen={modalIsOpen} onRequestClose={closeModal} openModal={openModal} closeModal={closeModal} />
 
         </div>

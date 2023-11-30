@@ -12,6 +12,7 @@ const AddTaskModal = ({ isOpen, onRequestClose, openModal, closeModal }) => {
   const [deadline, setDeadline] = useState('');
   const [note, setNote] = useState('');
   const [priority, setPriority] = useState('Medium'); // default to Medium
+  const [task_type, setTaskType] = useState('Assignment'); // default to Assignment
 
 
   const handleChange = (event) => {
@@ -28,6 +29,9 @@ const AddTaskModal = ({ isOpen, onRequestClose, openModal, closeModal }) => {
       case 'priority':
         setPriority(event.target.value);
         break;
+      case 'task_type':
+        setTaskType(event.target.value);
+        break;
       default:
         break;
     }
@@ -42,6 +46,7 @@ const AddTaskModal = ({ isOpen, onRequestClose, openModal, closeModal }) => {
       note: note,
       user_id: localStorage.getItem('uid'),
       priority: priority,
+      task_type: task_type,
     };
 
     console.log("current user id:", localStorage.getItem('uid')); // TESTING current user id
@@ -95,6 +100,14 @@ const AddTaskModal = ({ isOpen, onRequestClose, openModal, closeModal }) => {
                   <option value="High">High</option>
                   <option value="Medium">Medium</option>
                   <option value="Low">Low</option>
+                </select>
+              </label>
+              <label>
+                Task Type:
+                <select className="input-field" name="task_type" value={task_type} onChange={handleChange}>
+                  <option value="Assignment">Assignment</option>
+                  <option value="Project">Project</option>
+                  <option value="Exam">Exam</option>
                 </select>
               </label>
 

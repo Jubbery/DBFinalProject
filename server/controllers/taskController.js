@@ -68,7 +68,7 @@ const showTasksByAssignmentType = async (req, res) => {
 };
 
 const createTask = async (req, res) => {
-  const {
+  let {
     user_id,
     task_name,
     start_date,
@@ -79,9 +79,19 @@ const createTask = async (req, res) => {
     task_type,
   } = req.body;
 
+  // If deadline is not provided, set it to today's date
+  if (!deadline) {
+    let today = new Date();
+    deadline = today.toISOString().split('T')[0];
+  }
+
+  // If task_status is not provided or is an integer, set it to "Not-Started"
+  if (!status || typeof status === 'number') {
+  status = "Not-Started";
+}
   // If task_status is not provided, set it to "Not-Started"
-  if (!task_status) {
-    task_status = "Not-Started";
+  if (!status) {
+    status = "Not-Started";
   }
 
   try {
@@ -107,7 +117,12 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   const { taskId } = req.params;
+  console.log('taskId:', taskId); // TESTING Print taskId to the console  
   const { task_name, deadline, note, priority, task_status } = req.body;
+
+  // Print task_status to the console
+  console.log('task_name:', task_name); // TESTING Print task_name to the console
+  console.log('task_status:', task_status); // TESTING Print task_status to the console
 
   // If deadline is not provided, set it to today's date
   if (!deadline) {
@@ -115,10 +130,11 @@ const updateTask = async (req, res) => {
     deadline = today.toISOString().split('T')[0];
   }
 
+  
   try {
     const updatedTask = await db.query(
-      "UPDATE Tasks SET task_name = $1, deadline = $2, note = $3, priority_level = $4, task_status = $5 WHERE task_id = $5 RETURNING *",
-      [task_name, deadline, note, priority, taskId, task_status]
+      "UPDATE Tasks SET task_name = $1, deadline = $2, note = $3, priority_level = $4, task_status = $5 WHERE task_id = $6 RETURNING *",
+      [task_name, deadline, note, priority, task_status, taskId]
     );
 
     res.json(updatedTask.rows[0]);
