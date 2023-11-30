@@ -80,7 +80,7 @@ const createTask = async (req, res) => {
   } = req.body;
   try {
     const newTask = await db.query(
-      "INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, status, created_at, note, task_type) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8) RETURNING *",
+      "INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8) RETURNING *",
       [
         user_id,
         task_name,

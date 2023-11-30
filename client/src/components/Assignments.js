@@ -1,11 +1,11 @@
 import React, { Fragment, useEffect, useState, useCallback } from "react";
-import ListHeader from "./ListHeader";
+// import ListHeader from "./ListHeader";
 import ListItem from "./ListItem";
-import { useUser } from "../utils/UserContext";
+// import { useUser } from "../utils/UserContext";
 import { Button } from "@mui/material";
 
 const Assignments = () => {
-  const { user } = useUser();
+  const [user_id] = useState(localStorage.getItem('uid')); // Get user_id from localStorage
   const [myTasks, setTasks] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,11 +14,11 @@ const Assignments = () => {
   const [deadline, setDeadline] = useState('');
   const [note, setNote] = useState('');
 
-  if (user) {
+  if (user_id) {
     // TESTING user logging
-    console.log("TESTING: Current User:", user.user_id);
+    console.log("TESTING: Current User:", user_id, localStorage.getItem('uid'));
   } else {
-    console.log("TESTING: No Current User:", user);
+    console.log("TESTING: No Current User:", user_id);
   }
 
   // NEW CODE using JWT:
@@ -87,10 +87,13 @@ const Assignments = () => {
     event.preventDefault();
   
     const newTask = {
-      name: taskName,
+      task_name: taskName,
       deadline: deadline,
       note: note,
+      user_id: localStorage.getItem('uid'),
     };
+
+    console.log("current user id:", localStorage.getItem('uid')); // TESTING current user id
   
     try {
       const response = await fetch('http://localhost:8000/tasks', { // Make a POST request to the /tasks endpoint
