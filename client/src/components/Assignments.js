@@ -3,6 +3,7 @@ import ListHeader from "./ListHeader";
 import ListItem from "./ListItem";
 import { useUser } from "../utils/UserContext";
 import { Button } from "@mui/material";
+import FilterSelect from "./FilterSelect";
 
 const Assignments = () => {
   const { user } = useUser();
@@ -17,28 +18,9 @@ const Assignments = () => {
     console.log("TESTING: No Current User:", user);
   }
 
-  // // OLD CODE:
-  // const getData = useCallback(async () => {
-  //   if (!user) return;
-
-  //   setIsLoading(true);
-  //   setError(null);
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8000/tasks/order/deadline/${user.user_id}`
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error(`Error fetching tasks: ${response.statusText}`);
-  //     }
-  //     const json = await response.json();
-  //     setTasks(json);
-  //   } catch (err) {
-  //     console.error(err);
-  //     setError(err.message);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }, [user]); // Dependencies for useCallback
+  const handleFilterChange = (selectedFilter) => {
+    fetchDataBasedOnFilter(selectedFilter);
+  };
 
   // NEW CODE using JWT:
   const getData = useCallback(async () => {
@@ -69,6 +51,37 @@ const Assignments = () => {
     }
   }, []);
 
+  const fetchDataBasedOnFilter = useCallback(async (filterType) => {
+    setIsLoading(true);
+    setError(null);
+    const token = localStorage.getItem("token");
+    const url = `http://localhost:8000/tasks/${filterType}`;
+
+    try {
+      console.log("TESTING: Fetching tasks...");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching tasks: ${response.statusText}`);
+      }
+      const json = await response.json();
+      console.log("TESTING: Tasks fetched successfully:", json);
+      setTasks(json);
+    } catch (err) {
+      console.error("TESTING: Error fetching tasks:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDataBasedOnFilter("order/deadline"); // Default filter
+  }, [fetchDataBasedOnFilter]);
+
   useEffect(() => {
     getData();
   }, [getData]); // Dependency array for useEffect
@@ -84,6 +97,9 @@ const Assignments = () => {
           <Button variant="contained" className="create">
             ADD NEW
           </Button>
+        </div>
+        <div className="filter-container">
+          <FilterSelect onChange={handleFilterChange} />
         </div>
       </div>
       {myTasks &&
