@@ -124,10 +124,6 @@ const Assignments = () => {
       <div className="list-header">
         <h1>📚 Class Assignments List</h1>
         <div className="button-container">
-          <Button variant="contained" className="create">
-            ADD NEW
-          </Button>
-          
 
           <Button onClick={openModal}>Add New Task</Button> 
 
