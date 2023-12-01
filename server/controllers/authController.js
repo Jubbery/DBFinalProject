@@ -19,7 +19,7 @@ const checkDbConnection = async () => {
     console.error("Database connection error", error);
   }
 };
-// Call the function when your application starts
+// Call the function when application starts
 checkDbConnection();
 
 const loginUser = async (req, res) => {

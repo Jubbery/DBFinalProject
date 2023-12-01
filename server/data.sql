@@ -1,5 +1,4 @@
-
-CREATE DATABASE todoapp;
+CREATE DATABASE postgres;
 
 CREATE TYPE priority_enum AS ENUM ('High', 'Medium', 'Low');
 CREATE TYPE task_status_enum AS ENUM ('Not-Started', 'In-Progress', 'Completed');
@@ -13,6 +12,17 @@ CREATE TABLE Users (
   email VARCHAR(250) UNIQUE NOT NULL,
   hashed_pass CHAR(60) NOT NULL,
   canvasurl VARCHAR(250) DEFAULT NULL
+);
+
+CREATE TABLE CanvasEvents (
+  event_id TEXT PRIMARY KEY,
+  dtstamp TEXT,
+  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
+  dtstart TEXT,
+  description TEXT,
+  summary TEXT,
+  url TEXT,
+  task_type task_type_enum
 );
 
 CREATE TABLE Tasks (
@@ -105,6 +115,65 @@ AFTER INSERT OR UPDATE ON CanvasEvents
 FOR EACH ROW
 EXECUTE FUNCTION trigger_add_event_to_task();
 
+-- OUR VIEWS AND ROLES;
+CREATE ROLE admin_role WITH
+  LOGIN
+  SUPERUSER
+  CREATEDB
+  CREATEROLE
+  INHERIT
+  REPLICATION;
+
+-- Create a view for admin to see all users and related tasks
+CREATE OR REPLACE VIEW AdminView AS
+SELECT
+  U.user_id,
+  U.fname,
+  U.lname,
+  U.email,
+  T.task_id,
+  T.task_name,
+  T.start_date,
+  T.deadline,
+  T.priority_level,
+  T.task_status,
+  T.created_at,
+  T.note,
+  T.task_type
+FROM Users U
+JOIN Tasks T ON U.user_id = T.user_id;
+
+-- Grant SELECT privilege on the view to the admin role
+GRANT SELECT ON AdminView TO admin_role;
+
+-- Create a new user role
+CREATE ROLE user_role WITH LOGIN PASSWORD 'postgres';
+
+-- Grant necessary privileges to the user role (adjust as needed)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO user_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO user_role;
+
+-- Create a view for users to see their tasks
+CREATE OR REPLACE VIEW UserTasksView AS
+SELECT
+  U.user_id,
+  U.fname,
+  U.lname,
+  T.task_id,
+  T.task_name,
+  T.start_date,
+  T.deadline,
+  T.priority_level,
+  T.task_status,
+  T.created_at,
+  T.note,
+  T.task_type
+FROM Users U
+JOIN Tasks T ON U.user_id = T.user_id;
+
+-- Grant SELECT privilege on the view to the user role
+GRANT SELECT ON UserTasksView TO user_role;
+
 -- Enabling Views for Tables:
 CREATE OR REPLACE FUNCTION current_user_id() RETURNS INTEGER AS $$
 BEGIN
@@ -141,45 +210,7 @@ FOR ALL
 USING (user_id = current_user_id());
 
 
--- SIMULATED DATA FOR DATABASE 
-
--- Inserting data into Users table
--- plaintext password is "password" associated hash is '$2b$10$0krZmoyvT0NVvRAtZ1eBOeUw7ZLrikWtaCK1xbDCBe1IFi2bPO.iS    '
--- Users Table
--- INSERT INTO Users (fname, lname, email, hashed_pass) VALUES
---   ('John', 'Doe', 'john.doe@example.com', '$2b$10$2younuZUPbBrWIH15j6joOACwST4f3TAAvsB1HOCORc9mZuqNJSRa'),
---   ('Jane', 'Smith', 'jane.smith@example.com', '$2b$10$2younuZUPbBrWIH15j6joOACwST4f3TAAvsB1HOCORc9mZuqNJSRa');
-
--- -- Tasks Table
--- INSERT INTO Tasks (user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type) VALUES
---   (1, 'Study for Exam 1', '2023-11-22', '2023-11-30', 'High', 'Not-Started', '2023-11-22 12:00:00', 'Prepare for the upcoming exam', 'Exam'),
---   (2, 'Complete Project', '2023-11-25', '2023-12-05', 'Medium', 'In-Progress', '2023-11-22 14:30:00', 'Work on the assigned project', 'Project');
-
--- -- Tag Table
--- INSERT INTO Tag (tag_name, course_id, tag_description) VALUES
---   ('Math', 'MATH101', 'Introduction to Mathematics'),
---   ('CS', 'CS201', 'Introduction to Computer Science');
-
--- -- TaskTag Table
--- INSERT INTO TaskTag (task_id, tag_name) VALUES
---   (1, 'Math'),
---   (2, 'CS');
-
--- -- Notifications Table
--- INSERT INTO Notifications (user_id, message, notification_status, created_at, remind_at) VALUES
---   (1, 'Reminder: Exam Tomorrow', 'Unread', '2023-11-29 18:00:00', '2023-11-29 16:00:00'),
---   (2, 'Project Deadline Approaching', 'Unread', '2023-12-04 10:00:00', '2023-12-03 15:00:00');
-
--- -- TaskNotification Table
--- INSERT INTO TaskNotification (task_id, notification_id) VALUES
---   (1, 1),
---   (2, 2);
-
--- -- Courses Table
--- INSERT INTO Courses (course_id, tag_name, description, course_code, semester) VALUES
---   ('MATH101', 'Math', 'Introduction to Mathematics', 'MATH101', 'Fall 2023'),
---   ('CS201', 'CS', 'Introduction to Computer Science', 'CS201', 'Fall 2023');
-
+-- SIMULATING DATa:
 -- Inserting data into the Users table
 INSERT INTO Users (fname, lname, email, hashed_pass)
 VALUES ('Tom', 'Smith', 'tom@email.com', '$2b$10$2younuZUPbBrWIH15j6joOACwST4f3TAAvsB1HOCORc9mZuqNJSRa');
