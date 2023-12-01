@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState, useCallback } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import PlusIcon from "@mui/icons-material/Add";
 import FilterSelect from "./FilterSelect";
-import AddTaskModal from "./TaskModal"; // Transfered to
+import AddTaskModal from "./TaskModal";
 import AssignmentListItem from "./ListItem";
 
 const Assignments = () => {
