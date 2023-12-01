@@ -106,39 +106,39 @@ FOR EACH ROW
 EXECUTE FUNCTION trigger_add_event_to_task();
 
 -- Enabling Views for Tables:
--- CREATE OR REPLACE FUNCTION current_user_id() RETURNS INTEGER AS $$
--- BEGIN
---     RETURN (SELECT user_id FROM Users WHERE username = current_user);
--- END;
--- $$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION current_user_id() RETURNS INTEGER AS $$
+BEGIN
+    RETURN (SELECT user_id FROM Users WHERE username = current_user);
+END;
+$$ LANGUAGE plpgsql;
 
--- ALTER TABLE Users ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE Tasks ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE CanvasEvents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE Users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE Tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE CanvasEvents ENABLE ROW LEVEL SECURITY;
 
--- CREATE POLICY select_own_record ON Users
--- FOR SELECT
--- USING (user_id = current_user_id());
+CREATE POLICY select_own_record ON Users
+FOR SELECT
+USING (user_id = current_user_id());
 
--- CREATE POLICY update_own_record ON Users
--- FOR UPDATE
--- USING (user_id = current_user_id());
+CREATE POLICY update_own_record ON Users
+FOR UPDATE
+USING (user_id = current_user_id());
 
--- CREATE POLICY select_own_tasks ON Tasks
--- FOR SELECT
--- USING (user_id = current_user_id());
+CREATE POLICY select_own_tasks ON Tasks
+FOR SELECT
+USING (user_id = current_user_id());
 
--- CREATE POLICY modify_own_tasks ON Tasks
--- FOR ALL
--- USING (user_id = current_user_id());
+CREATE POLICY modify_own_tasks ON Tasks
+FOR ALL
+USING (user_id = current_user_id());
 
--- CREATE POLICY select_own_events ON CanvasEvents
--- FOR SELECT
--- USING (user_id = current_user_id());
+CREATE POLICY select_own_events ON CanvasEvents
+FOR SELECT
+USING (user_id = current_user_id());
 
--- CREATE POLICY modify_own_events ON CanvasEvents
--- FOR ALL
--- USING (user_id = current_user_id());
+CREATE POLICY modify_own_events ON CanvasEvents
+FOR ALL
+USING (user_id = current_user_id());
 
 
 -- SIMULATED DATA FOR DATABASE 

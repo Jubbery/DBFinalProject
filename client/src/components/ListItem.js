@@ -1,6 +1,4 @@
 import React, { Fragment, useState } from "react";
-import DOMPurify from "dompurify";
-import TickIcon from "./TickIcon";
 import {
   Accordion,
   AccordionSummary,
@@ -79,12 +77,14 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
 
   return (
     <Fragment>
-      <Accordion>
+      <Accordion
+        sx={{ bgcolor: "#1976D2", marginBottom: "8px", borderRadius: "8px" }}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>{myTask.task_name}</Typography>
+          <Typography color={"white"}>{myTask.task_name}</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <List sx={{ bgcolor: "background.paper" }}>
+          <List sx={{ bgcolor: "lightblue", borderRadius: "8px" }}>
             <ListItem>
               <ListItemText
                 primary={
@@ -269,13 +269,19 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
             sx={{
               display: "flex",
               justifyContent: "space-between",
+              marginTop: "8px",
             }}
           >
             <Button
               fullWidth
               onClick={handleEdit}
               variant="contained"
-              color="primary"
+              sx={{
+                color: "white",
+                bgcolor: "darkgoldenrod",
+                marginRight: "8px",
+              }}
+              color="success"
             >
               Edit
             </Button>

@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, useCallback } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import PlusIcon from "@mui/icons-material/Add";
 import FilterSelect from "./FilterSelect";
 import AddTaskModal from "./TaskModal"; // Transfered to
@@ -11,7 +11,6 @@ const Assignments = () => {
   const [error, setError] = useState(null);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [currentFilter, setCurrentFilter] = useState("order/deadline");
-  let runAgainFlag = false;
 
   const openModal = () => {
     setIsOpen(true);
@@ -129,7 +128,7 @@ const Assignments = () => {
 
   useEffect(() => {
     fetchDataBasedOnFilter(currentFilter); // Default filter
-  }, [currentFilter, runAgainFlag]);
+  }, [currentFilter]);
 
   useEffect(() => {
     getData();

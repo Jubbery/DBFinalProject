@@ -10,8 +10,6 @@ import {
   InputLabel,
 } from "@mui/material";
 import React, { useState } from "react";
-// import Modal from 'react-modal';
-// import { Button } from "@mui/material";
 
 const style = {
   position: "absolute",
@@ -25,11 +23,6 @@ const style = {
 };
 
 const AddTaskModal = ({ isOpen, onRequestClose, taskAdded }) => {
-  // const [user_id] = useState(localStorage.getItem('uid')); // Get user_id from localStorage
-  // const [myTasks, setTasks] = useState([]);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [error, setError] = useState(null);
-  // const [showModal, setShowModal] = useState(false);
   const [taskName, setTaskName] = useState("");
   const [deadline, setDeadline] = useState("");
   const [note, setNote] = useState("");
