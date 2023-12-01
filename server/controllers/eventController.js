@@ -40,6 +40,7 @@ const categorizeTaskType = (title, description) => {
 };
 
 const storeCanvasEvents = async (req, res) => {
+  // Get the user_id from the client JWT
   const user_id = jwt.verify(
     req.header("Authorization").split(" ")[1],
     process.env.JWT_SECRET
@@ -62,26 +63,23 @@ const storeCanvasEvents = async (req, res) => {
     const response = await fetch(canvasUrl);
     const data = await response.text();
     const jcalData = ICAL.parse(data);
-    const comp = new ICAL.Component(jcalData);
-    const events = comp.getAllSubcomponents("vevent").map((vevent) => {
-      const event = new ICAL.Event(vevent);
-      const eventJson = convertJCalToJSON(event.component.jCal);
-      return eventJson;
-    });
-
+    const events = new ICAL.Component(jcalData)
+      .getAllSubcomponents("vevent")
+      .map((vevent) => {
+        const event = new ICAL.Event(vevent);
+        const eventJson = convertJCalToJSON(event.component.jCal);
+        return eventJson;
+      });
     // Begin the transaction
     await db.query("BEGIN");
-
     // Insert each event into the CanvasEvents table
     for (const event of events) {
-      // console.log("Inserting event:", Object.keys(event.component.jCal));
-      // const taskType = categorizeTaskType(event.summary, event.description);
-      // Modify this query to match Canvas event object structure
       await db.query(
         `
         INSERT INTO CanvasEvents 
           (event_id, dtstamp, user_id, dtstart, description, summary, url, task_type)
             VALUES ($1, $2, $3, $4, $5, $6, $7, 
+              -- Assess the task_type based on the summary and description
               CASE 
                 WHEN LOWER($6) LIKE '%exam%' OR LOWER($5) LIKE '%exam%' THEN 'Exam'
                 WHEN LOWER($6) LIKE '%test%' OR LOWER($5) LIKE '%test%' THEN 'Exam'
@@ -113,12 +111,10 @@ const storeCanvasEvents = async (req, res) => {
         ]
       );
     }
-
     // Commit the transaction
     await db.query("COMMIT");
 
     res.status(200).send("Events stored successfully");
-    console.log("Events stored successfully");
   } catch (error) {
     // Rollback the transaction on error
     await db.query("ROLLBACK");

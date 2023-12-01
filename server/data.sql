@@ -39,17 +39,6 @@ CREATE TABLE Tasks (
   task_type task_type_enum
 );
 
-CREATE TABLE CanvasEvents (
-  event_id TEXT PRIMARY KEY,
-  dtstamp TEXT,
-  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
-  dtstart TEXT,
-  description TEXT,
-  summary TEXT,
-  url TEXT,
-  task_type task_type_enum
-);
-
 CREATE TABLE Tag (
   tag_name VARCHAR(250) PRIMARY KEY,
   course_id VARCHAR(250) UNIQUE,
@@ -86,15 +75,15 @@ CREATE TABLE Courses (
 CREATE OR REPLACE FUNCTION trigger_add_event_to_task()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Check if a task associated with this event_id already exists --
+  -- Check if a task associated with this event_id already exists
   IF NOT EXISTS (SELECT 1 FROM Tasks WHERE event_id = NEW.event_id) THEN
-    -- If no task with this event_id exists, insert a new task --
+    -- If no task with this event_id exists, insert a new task
     INSERT INTO Tasks 
       (event_id, user_id, task_name, start_date, deadline, priority_level, task_status, created_at, note, task_type)
     VALUES 
       (NEW.event_id, NEW.user_id, NEW.summary, NEW.dtstamp::DATE, NEW.dtstart::DATE, 'Medium', 'Not-Started', NOW(), NEW.description, NEW.task_type);
   ELSE
-    -- If a task with this event_id already exists, update that task --
+    -- If a task with this event_id already exists, update that task
     UPDATE Tasks SET
       user_id = NEW.user_id,
       task_name = NEW.summary,
@@ -210,7 +199,7 @@ FOR ALL
 USING (user_id = current_user_id());
 
 
--- SIMULATING DATa:
+-- SIMULATING DATA:
 -- Inserting data into the Users table
 INSERT INTO Users (fname, lname, email, hashed_pass)
 VALUES ('Tom', 'Smith', 'tom@email.com', '$2b$10$2younuZUPbBrWIH15j6joOACwST4f3TAAvsB1HOCORc9mZuqNJSRa');
