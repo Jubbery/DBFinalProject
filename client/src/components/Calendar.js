@@ -46,7 +46,6 @@ const Calendar = () => {
     setNewEventTitle("");
     setNewEventDate(selectInfo.startStr); // set start date
 
-    // Optionally, if you want to handle end date
     // setNewEventEndDate(selectInfo.endStr);
   };
 

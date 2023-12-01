@@ -76,7 +76,7 @@ const storeCanvasEvents = async (req, res) => {
     for (const event of events) {
       // console.log("Inserting event:", Object.keys(event.component.jCal));
       // const taskType = categorizeTaskType(event.summary, event.description);
-      // Modify this query to match your Canvas event object structure
+      // Modify this query to match Canvas event object structure
       await db.query(
         `
         INSERT INTO CanvasEvents 

@@ -115,6 +115,65 @@ AFTER INSERT OR UPDATE ON CanvasEvents
 FOR EACH ROW
 EXECUTE FUNCTION trigger_add_event_to_task();
 
+-- OUR VIEWS AND ROLES;
+CREATE ROLE admin_role WITH
+  LOGIN
+  SUPERUSER
+  CREATEDB
+  CREATEROLE
+  INHERIT
+  REPLICATION;
+
+-- Create a view for admin to see all users and related tasks
+CREATE OR REPLACE VIEW AdminView AS
+SELECT
+  U.user_id,
+  U.fname,
+  U.lname,
+  U.email,
+  T.task_id,
+  T.task_name,
+  T.start_date,
+  T.deadline,
+  T.priority_level,
+  T.task_status,
+  T.created_at,
+  T.note,
+  T.task_type
+FROM Users U
+JOIN Tasks T ON U.user_id = T.user_id;
+
+-- Grant SELECT privilege on the view to the admin role
+GRANT SELECT ON AdminView TO admin_role;
+
+-- Create a new user role
+CREATE ROLE user_role WITH LOGIN PASSWORD 'postgres';
+
+-- Grant necessary privileges to the user role (adjust as needed)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO user_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO user_role;
+
+-- Create a view for users to see their tasks
+CREATE OR REPLACE VIEW UserTasksView AS
+SELECT
+  U.user_id,
+  U.fname,
+  U.lname,
+  T.task_id,
+  T.task_name,
+  T.start_date,
+  T.deadline,
+  T.priority_level,
+  T.task_status,
+  T.created_at,
+  T.note,
+  T.task_type
+FROM Users U
+JOIN Tasks T ON U.user_id = T.user_id;
+
+-- Grant SELECT privilege on the view to the user role
+GRANT SELECT ON UserTasksView TO user_role;
+
 -- Enabling Views for Tables:
 -- CREATE OR REPLACE FUNCTION current_user_id() RETURNS INTEGER AS $$
 -- BEGIN
@@ -149,7 +208,6 @@ EXECUTE FUNCTION trigger_add_event_to_task();
 -- CREATE POLICY modify_own_events ON CanvasEvents
 -- FOR ALL
 -- USING (user_id = current_user_id());
-
 
 
 -- SIMULATING DATa:
