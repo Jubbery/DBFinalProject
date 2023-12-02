@@ -6,11 +6,16 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  Grid,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
   const [formData, setFormData] = React.useState({
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     showPassword: false,
@@ -25,6 +30,8 @@ function Signup() {
     setFormData({ ...formData, showPassword: !formData.showPassword });
   };
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setErrorMessage("");
@@ -35,6 +42,8 @@ function Signup() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          fname: formData.firstName,
+          lname: formData.lastName,
           email: formData.email,
           password: formData.password,
         }),
@@ -42,7 +51,11 @@ function Signup() {
       if (!response.ok) {
         throw new Error("Signup failed");
       }
-      // Handle successful signup (needs to redirect to login page)
+
+      alert("Signup Success!");
+
+      // redirect to login page
+      navigate("/login");
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -55,6 +68,32 @@ function Signup() {
           Sign up
         </Typography>
         <form noValidate onSubmit={handleSubmit}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="firstName"
+            label="First Name"
+            name="firstName"
+            autoComplete="name"
+            autoFocus
+            value={formData.firstName}
+            onChange={handleChange("firstName")}
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="lastName"
+            label="Last Name"
+            name="lastName"
+            autoComplete="name"
+            autoFocus
+            value={formData.lastName}
+            onChange={handleChange("lastName")}
+          />
           <TextField
             variant="outlined"
             margin="normal"
@@ -97,6 +136,11 @@ function Signup() {
           <Button type="submit" fullWidth variant="contained" color="primary">
             Sign Up
           </Button>
+          <Grid container justifyContent="center">
+            <Grid item>
+              <Link href="/login">Already have an account?</Link>
+            </Grid>
+          </Grid>
         </form>
       </div>
     </Container>

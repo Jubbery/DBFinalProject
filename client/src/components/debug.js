@@ -19,13 +19,8 @@ const StringDisplay = ({ text }) => {
 
 const EventItem = ({ event }) => {
   const mapEvent = mapEventToObject(event);
-  // Safely access the properties of the event
-
   const rawHtmlDescription = mapEvent.xAltDesc;
-  // Sanitize the HTML content
   const safeHtmlDescription = DOMPurify.sanitize(rawHtmlDescription);
-
-  // Ensure that there is a summary to display
   if (!mapEvent.summary) {
     return <Typography>No Event Summary</Typography>;
   }
@@ -67,13 +62,13 @@ const mapEventToObject = (eventData) => {
     xAltDesc: "",
   };
 
-  // Loop through the second element of the component array, which holds the event details
+  // Loop through the 2nd element of the component array, which holds the event details
   eventData.component[1].forEach((detail) => {
-    // Use the first element as the key and the fourth element as the value
+    // Use the 1st element as the key and the 4th element as the value
     const key = detail[0];
     const value = detail[3];
 
-    // Map the iCalendar keys to object keys
+    // Map iCalendar keys to obj keys
     switch (key) {
       case "dtstamp":
         mappedEvent.dtstamp = value;
@@ -100,7 +95,7 @@ const mapEventToObject = (eventData) => {
         mappedEvent.url = value;
         break;
       case "x-alt-desc":
-        // Note: We can also sanitize the HTML here if needed
+        // Note: We can also sanitize the HTML here
         mappedEvent.xAltDesc = value;
         break;
       default:
@@ -108,16 +103,14 @@ const mapEventToObject = (eventData) => {
     }
   });
 
-  // Return the mapped event object
+  // Return the mapped event obj
   return mappedEvent;
 };
 
-// Debug component
-
+// Debug canvas data component
+// Left in to demonstrate how canvas calendar data is retrieved
 const Debug = () => {
-  const [canvasURL, setCanvasURL] = useState(
-    "https://usflearn.instructure.com/feeds/calendars/user_SHVaiPo39bUeCXcP4sRIZD4kmvYBDcfJPPQoowVh.ics"
-  ); // Initialize with empty string or actual URL
+  const [canvasURL, setCanvasURL] = useState("");
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -125,6 +118,12 @@ const Debug = () => {
   const fetchAllCanvasEvents = async () => {
     setLoading(true);
     setError(null);
+
+    if (!canvasURL) {
+      setError("Please enter a Canvas Calendar URL");
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -143,7 +142,7 @@ const Debug = () => {
       }
       const data = await response.json();
       console.log(data);
-      setEvents(data.events); // Map to the correct structure for EventsList
+      setEvents(data.events);
     } catch (error) {
       console.error("Error fetching all Canvas events:", error);
       setError(error.message);

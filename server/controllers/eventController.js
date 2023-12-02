@@ -1,55 +1,125 @@
-const pool = require("../db");
+const db = require("../db");
 const fetch = require("node-fetch");
 const ICAL = require("ical.js");
+const jwt = require("jsonwebtoken");
 
-const processCanvasEvent = async (req, res) => {
-  const eventData = req.body; // The mapped event object sent in the request body
+const convertJCalToJSON = (jCal) => {
+  const jsonEvent = {};
+  jCal[1].forEach((prop) => {
+    const propName = prop[0];
+    const propValue = prop[3];
+    jsonEvent[propName] = propValue;
+  });
+  return jsonEvent;
+};
+
+const categorizeTaskType = (title, description) => {
+  const taskKeywords = {
+    Exam: ["exam", "test", "quiz"],
+    Assignment: ["assignment", "homework", "worksheet"],
+    Project: ["project", "presentation", "group work"],
+  };
+
+  // Function to check if the text contains any of the keywords
+  const containsKeyword = (text, keywords) => {
+    return keywords.some((keyword) => text.toLowerCase().includes(keyword));
+  };
+
+  // Check title and description for each type
+  for (const [type, keywords] of Object.entries(taskKeywords)) {
+    if (
+      containsKeyword(title, keywords) ||
+      containsKeyword(description, keywords)
+    ) {
+      return type;
+    }
+  }
+
+  // Default type if no keywords found
+  return "Assignment";
+};
+
+const storeCanvasEvents = async (req, res) => {
+  // Get the user_id from the client JWT
+  const user_id = jwt.verify(
+    req.header("Authorization").split(" ")[1],
+    process.env.JWT_SECRET
+  ).user_id;
 
   try {
-    // Check if the event with the same uid already exists
-    const existingEvent = await pool.query(
-      "SELECT * FROM events WHERE uid = $1",
-      [eventData.uid]
+    // Get the Canvas URL for the user
+    const userUrlResult = await db.query(
+      "SELECT canvasurl FROM Users WHERE user_id = $1",
+      [user_id]
     );
+    console.log("User URL result:", userUrlResult.rows);
+    const canvasUrl = userUrlResult.rows[0].canvasurl;
 
-    if (existingEvent.rows.length > 0) {
-      // If the event exists, update the existing record
+    if (!canvasUrl) {
+      return res.status(404).send("Canvas URL not found for the user");
+    }
+
+    // Fetch events from the Canvas URL
+    const response = await fetch(canvasUrl);
+    const data = await response.text();
+    const jcalData = ICAL.parse(data);
+    const events = new ICAL.Component(jcalData)
+      .getAllSubcomponents("vevent")
+      .map((vevent) => {
+        const event = new ICAL.Event(vevent);
+        const eventJson = convertJCalToJSON(event.component.jCal);
+        return eventJson;
+      });
+    // Begin the transaction
+    await db.query("BEGIN");
+    // Insert each event into the CanvasEvents table
+    for (const event of events) {
       await db.query(
-        "UPDATE events SET dtstamp = $1, dtstart = $2, class = $3, description = $4, sequence = $5, summary = $6, url = $7, x_alt_desc = $8 WHERE uid = $9",
+        `
+        INSERT INTO CanvasEvents 
+          (event_id, dtstamp, user_id, dtstart, description, summary, url, task_type)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 
+              -- Assess the task_type based on the summary and description
+              CASE 
+                WHEN LOWER($6) LIKE '%exam%' OR LOWER($5) LIKE '%exam%' THEN 'Exam'
+                WHEN LOWER($6) LIKE '%test%' OR LOWER($5) LIKE '%test%' THEN 'Exam'
+                WHEN LOWER($6) LIKE '%quiz%' OR LOWER($5) LIKE '%quiz%' THEN 'Exam'
+                WHEN LOWER($6) LIKE '%assignment%' OR LOWER($5) LIKE '%assignment%' THEN 'Assignment'
+                WHEN LOWER($6) LIKE '%homework%' OR LOWER($5) LIKE '%homework%' THEN 'Assignment'
+                WHEN LOWER($6) LIKE '%worksheet%' OR LOWER($5) LIKE '%worksheet%' THEN 'Assignment'
+                WHEN LOWER($6) LIKE '%project%' OR LOWER($5) LIKE '%project%' THEN 'Project'
+                WHEN LOWER($6) LIKE '%presentation%' OR LOWER($5) LIKE '%presentation%' THEN 'Project'
+                WHEN LOWER($6) LIKE '%group work%' OR LOWER($5) LIKE '%group work%' THEN 'Project'
+                ELSE 'Assignment' -- Default type if no keywords found
+              END::task_type_enum)
+          ON CONFLICT (event_id) DO UPDATE 
+          SET dtstamp = EXCLUDED.dtstamp,
+              user_id = EXCLUDED.user_id,
+              dtstart = EXCLUDED.dtstart,
+              description = EXCLUDED.description,
+              summary = EXCLUDED.summary,
+              url = EXCLUDED.url
+      `,
         [
-          eventData.dtstamp,
-          eventData.dtstart,
-          eventData.class,
-          eventData.description,
-          eventData.sequence,
-          eventData.summary,
-          eventData.url,
-          eventData.xAltDesc,
-          eventData.uid,
-        ]
-      );
-    } else {
-      // If the event does not exist, insert a new record
-      await db.query(
-        "INSERT INTO events (dtstamp, uid, dtstart, class, description, sequence, summary, url, x_alt_desc) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-        [
-          eventData.dtstamp,
-          eventData.uid,
-          eventData.dtstart,
-          eventData.class,
-          eventData.description,
-          eventData.sequence,
-          eventData.summary,
-          eventData.url,
-          eventData.xAltDesc,
+          event.uid,
+          event.dtstamp,
+          user_id,
+          event.dtstart,
+          event.description,
+          event.summary,
+          event.url,
         ]
       );
     }
+    // Commit the transaction
+    await db.query("COMMIT");
 
-    res.status(200).json({ message: "Event processed successfully." });
+    res.status(200).send("Events stored successfully");
   } catch (error) {
-    console.error("Database operation failed", error);
-    res.status(500).json({ error: "Database operation failed" });
+    // Rollback the transaction on error
+    await db.query("ROLLBACK");
+    console.error("Error storing events:", error);
+    res.status(500).send("Failed to store events");
   }
 };
 
@@ -61,6 +131,12 @@ const fetchCanvasEvents = async (req, res) => {
   }
 
   try {
+    const user_id = jwt.verify(
+      req.header("Authorization").split(" ")[1],
+      process.env.JWT_SECRET
+    ).user_id;
+    await updateUserCanvasUrl(user_id, canvasURL);
+
     const response = await fetch(canvasURL);
     const data = await response.text();
 
@@ -74,12 +150,26 @@ const fetchCanvasEvents = async (req, res) => {
         start: event.startDate.toString(),
       };
     });
-    console.log(events);
 
     res.send({ events });
   } catch (error) {
     console.error("Error fetching Canvas events:", error.message);
     res.status(500).send({ error: "Failed to fetch events." });
+  }
+};
+
+const updateUserCanvasUrl = async (userId, canvasUrl) => {
+  try {
+    const query = `
+      UPDATE Users
+      SET canvasurl = $1
+      WHERE user_id = $2;
+    `;
+    const values = [canvasUrl, userId];
+    await db.query(query, values);
+    console.log("Canvas URL updated successfully");
+  } catch (err) {
+    console.error("Error updating Canvas URL:", err);
   }
 };
 
@@ -111,7 +201,7 @@ const fetchAllCanvasEvents = async (req, res) => {
 };
 
 module.exports = {
-  processCanvasEvent,
+  storeCanvasEvents,
   fetchCanvasEvents,
   fetchAllCanvasEvents,
 };

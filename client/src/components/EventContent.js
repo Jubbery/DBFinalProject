@@ -26,7 +26,7 @@ const EventContent = ({ eventInfo }) => (
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
-          maxWidth: "100%", // Ensure it doesn't overflow the calendar's cell
+          maxWidth: "100%", // Ensure it won't overflow calendar cells
         }}
       >
         {eventInfo.event.title}

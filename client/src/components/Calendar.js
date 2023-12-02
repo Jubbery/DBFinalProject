@@ -44,10 +44,9 @@ const Calendar = () => {
 
     // Set initial event data based on selection
     setNewEventTitle("");
-    setNewEventDate(selectInfo.startStr); // set start date
 
-    // Optionally, if you want to handle end date
-    // setNewEventEndDate(selectInfo.endStr);
+    // Set start date
+    setNewEventDate(selectInfo.startStr);
   };
 
   const handleEventAdd = () => {
@@ -82,9 +81,6 @@ const Calendar = () => {
     });
 
     setCurrentEvents(updatedEvents);
-
-    // Optionally, update the event's position in the backend
-    // updateEventInBackend(dropInfo.event);
   };
 
   const handleEventResize = (resizeInfo) => {
@@ -101,30 +97,50 @@ const Calendar = () => {
     });
 
     setCurrentEvents(updatedEvents);
-
-    // Optionally, you can also update this in the backend
-    // updateEventInBackend(resizeInfo.event);
   };
 
   const handleFetchCanvasEvents = async () => {
     if (!canvasURL) return;
     setLoading(true);
     try {
-      const response = await fetch(
+      const fetchResponse = await fetch(
         "http://localhost:8000/events/fetchCanvasEvents",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ canvasURL: canvasURL }),
         }
       );
-      const data = await response.json();
-      setCurrentEvents((prevEvents) => [...prevEvents, ...data.events]);
-      console.log(data.events);
+      if (!fetchResponse.ok) {
+        throw new Error(
+          `Error fetching Canvas events: ${fetchResponse.statusText}`
+        );
+      }
+      const fetchData = await fetchResponse.json();
+      setCurrentEvents((prevEvents) => [...prevEvents, ...fetchData.events]);
+
+      // Send events to db
+      const storeResponse = await fetch(
+        "http://localhost:8000/events/storeCanvasEvents",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (!storeResponse.ok) {
+        throw new Error(
+          `Error storing Canvas events: ${storeResponse.statusText}`
+        );
+      }
+      console.log("Canvas events stored successfully");
     } catch (error) {
-      console.error("Error fetching Canvas events:", error);
+      console.error("Error in fetching/storing Canvas events:", error);
     } finally {
       setLoading(false);
     }
@@ -153,7 +169,7 @@ const Calendar = () => {
           selectMirror={true}
           dayMaxEvents={true}
           weekends={weekendsVisible}
-          events={currentEvents} // Use a function or URL for dynamic event fetching
+          events={currentEvents}
           eventContent={(eventInfo) => <EventContent eventInfo={eventInfo} />}
           eventClick={handleEventClick}
           select={handleDateSelect}

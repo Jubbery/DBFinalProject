@@ -1,14 +1,37 @@
 const bcrypt = require("bcrypt"); // for password hashing
 const jwt = require("jsonwebtoken"); // for token generation
-const pool = require("../db");
+const db = require("../db");
+
+const checkDbConnection = async () => {
+  console.log(db);
+  try {
+    await db.query("SELECT NOW()");
+    console.log("Database connection successful");
+
+    const tables = await db.query(
+      "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
+    );
+    console.log("Tables in database:", tables.rows);
+
+    const users = await db.query("SELECT * FROM users");
+    console.log("Users in database:", users.rows);
+  } catch (error) {
+    console.error("Database connection error", error);
+  }
+};
+
+// Check database connection on startup
+checkDbConnection();
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
+
   try {
     // Check if user exists
-    const user = await pool.query("SELECT * FROM Users WHERE email = $1", [
+    const user = await db.query(`SELECT * FROM users WHERE email = $1`, [
       email,
     ]);
+
     if (user.rows.length === 0) {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
@@ -18,6 +41,7 @@ const loginUser = async (req, res) => {
       password,
       user.rows[0].hashed_pass
     );
+
     if (!validPassword) {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
@@ -29,23 +53,23 @@ const loginUser = async (req, res) => {
       { expiresIn: "2 days" }
     );
 
-    res.json({ token });
+    res.json({ token: token });
   } catch (err) {
-    console.error(err.message);
+    console.error("Error during login:", err.message);
     res.status(500).send("Server Error");
   }
 };
 
 const signupUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { fname, lname, email, password } = req.body;
+
   try {
-    console.log(req.body);
     // Check if user already exists
-    const existingUser = await pool.query(
+    const existingUser = await db.query(
       "SELECT * FROM Users WHERE email = $1",
       [email]
     );
-    console.log(existingUser);
+
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ error: "User already exists" });
     }
@@ -55,15 +79,18 @@ const signupUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Insert the new user into the database
-    const newUser = await pool.query(
-      "INSERT INTO Users (email, hashed_pass) VALUES ($1, $2) RETURNING *",
-      [email, hashedPassword]
+    const newUser = await db.query(
+      `INSERT INTO Users 
+      (fname, lname, email, hashed_pass) 
+      VALUES ($1, $2, $3, $4) 
+      RETURNING *
+      `,
+      [fname, lname, email, hashedPassword]
     );
 
     res.status(201).json(newUser.rows[0]);
   } catch (err) {
-    console.error(err.message);
-    console.error(err);
+    console.error("Error during signup:", err.message);
     res.status(500).send("Server Error");
   }
 };
@@ -71,4 +98,5 @@ const signupUser = async (req, res) => {
 module.exports = {
   loginUser,
   signupUser,
+  checkDbConnection,
 };
