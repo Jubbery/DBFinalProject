@@ -39,17 +39,6 @@ CREATE TABLE Tasks (
   task_type task_type_enum
 );
 
-CREATE TABLE CanvasEvents (
-  event_id TEXT PRIMARY KEY,
-  dtstamp TEXT,
-  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE NOT NULL,
-  dtstart TEXT,
-  description TEXT,
-  summary TEXT,
-  url TEXT,
-  task_type task_type_enum
-);
-
 CREATE TABLE Tag (
   tag_name VARCHAR(250) PRIMARY KEY,
   course_id VARCHAR(250) UNIQUE,
