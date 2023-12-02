@@ -29,13 +29,12 @@ const Assignments = () => {
     setCurrentFilter(selectedFilter);
   };
 
-  // NEW CODE using JWT:
   const getData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     const token = localStorage.getItem("token");
     try {
-      console.log("TESTING: Fetching tasks..."); // Log before fetching
+      console.log("Fetching tasks..."); // Log before fetching
       const response = await fetch(
         `http://localhost:8000/tasks/order/deadline`,
         {
@@ -48,10 +47,10 @@ const Assignments = () => {
         throw new Error(`Error fetching tasks: ${response.statusText}`);
       }
       const json = await response.json();
-      console.log("TESTING: Tasks fetched successfully:", json); // Log after successful fetch
+      console.log("Tasks fetched successfully:", json);
       setTasks(json);
     } catch (err) {
-      console.error("TESTING: Error fetching tasks:", err); // Log error
+      console.error("Error fetching tasks:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -65,7 +64,7 @@ const Assignments = () => {
     const url = `http://localhost:8000/tasks/${filterType}`;
 
     try {
-      console.log("TESTING: Fetching tasks...");
+      console.log("Fetching tasks...");
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,

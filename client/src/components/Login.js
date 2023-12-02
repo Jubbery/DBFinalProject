@@ -23,12 +23,19 @@ export default function Login() {
         console.log("Login Fail!"); // TESTING Output message on fail login
         throw new Error("Login failed");
       }
-      const data = await response.json();
-      localStorage.setItem("token", data.token); // Store the token
-      console.log(data);
-      localStorage.setItem("uid", data.uid); // Store the token
 
-      navigate("/assignments"); // Redirect to /assignments
+      const data = await response.json();
+
+      if (data.token) {
+        localStorage.setItem("token", data.token); // Store the token
+      }
+
+      if (data.uid) {
+        localStorage.setItem("uid", data.uid); // Store the token
+      }
+
+      // Redirect to /assignments
+      navigate("/assignments");
     } catch (error) {
       setErrorMessage(error.message);
     }

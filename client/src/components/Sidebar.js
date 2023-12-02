@@ -44,7 +44,7 @@ const Sidebar = ({ weekendsVisible, handleWeekendsToggle, currentEvents }) => (
       display: "flex",
       flexDirection: "column",
       maxHeight: "calc(70vh - 100px)",
-      overflow: "auto", // Makes the sidebar scrollable when content overflows
+      overflow: "auto", // Makes the sidebar scrollable when content overflows (thank god)
     }}
   >
     <Box sx={{ marginBottom: "20px" }}>

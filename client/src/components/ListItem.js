@@ -84,6 +84,7 @@ const AssignmentListItem = ({ myTask, onEdit, onDelete }) => {
           <Typography color={"white"}>{myTask.task_name}</Typography>
         </AccordionSummary>
         <AccordionDetails>
+          {/* WIP: put these list items in a loop. */}
           <List sx={{ bgcolor: "lightblue", borderRadius: "8px" }}>
             <ListItem>
               <ListItemText

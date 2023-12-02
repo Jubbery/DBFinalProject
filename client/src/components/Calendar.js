@@ -44,9 +44,9 @@ const Calendar = () => {
 
     // Set initial event data based on selection
     setNewEventTitle("");
-    setNewEventDate(selectInfo.startStr); // set start date
 
-    // setNewEventEndDate(selectInfo.endStr);
+    // Set start date
+    setNewEventDate(selectInfo.startStr);
   };
 
   const handleEventAdd = () => {
@@ -81,9 +81,6 @@ const Calendar = () => {
     });
 
     setCurrentEvents(updatedEvents);
-
-    // Optionally, update the event's position in the backend
-    // updateEventInBackend(dropInfo.event);
   };
 
   const handleEventResize = (resizeInfo) => {
@@ -100,9 +97,6 @@ const Calendar = () => {
     });
 
     setCurrentEvents(updatedEvents);
-
-    // Optionally, you can also update this in the backend
-    // updateEventInBackend(resizeInfo.event);
   };
 
   const handleFetchCanvasEvents = async () => {
@@ -175,7 +169,7 @@ const Calendar = () => {
           selectMirror={true}
           dayMaxEvents={true}
           weekends={weekendsVisible}
-          events={currentEvents} // Use a function or URL for dynamic event fetching
+          events={currentEvents}
           eventContent={(eventInfo) => <EventContent eventInfo={eventInfo} />}
           eventClick={handleEventClick}
           select={handleDateSelect}

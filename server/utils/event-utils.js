@@ -1,8 +1,6 @@
 var eventGuid;
-/* jshint ignore:start */
 var eventGuid;
 (function () {
-  /* istanbul ignore next */
   if (typeof module === "object") {
     // CommonJS, where exports may be different each time.
     eventGuid = module.exports;
@@ -10,7 +8,6 @@ var eventGuid;
     typeof HTMLScriptElement !== "undefined" &&
     "noModule" in HTMLScriptElement.prototype
   ) {
-    // Using <script type="module"> define ICAL on the window global.
     window.eventGuid = eventGuid = {};
   } else if (typeof eventGuid !== "object") {
     eventGuid = {};

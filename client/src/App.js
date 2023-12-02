@@ -12,9 +12,6 @@ import { UserProvider } from "./utils/UserContext";
 import Logout from "./components/Logout.js";
 
 const App = () => {
-  // Hard coded for now
-  let signedIn = true;
-
   return (
     <UserProvider>
       <Router>
@@ -24,12 +21,8 @@ const App = () => {
         <div className="app">
           <div className="body">
             <Routes>
-              <Route
-                path="/signup"
-                element={
-                  localStorage.getItem("token") ? <Signup /> : <Assignments />
-                }
-              />
+              <Route path="/" element={<FAQ />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="/assignments" element={<Assignments />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/faq" element={<FAQ />} />

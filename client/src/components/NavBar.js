@@ -107,7 +107,7 @@ function NavBar() {
             variant="h5"
             noWrap
             component="a"
-            href="/welcome"
+            href="/signup"
             sx={{
               mr: 2,
               display: { xs: "flex", md: "none" },

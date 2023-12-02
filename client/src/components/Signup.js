@@ -51,10 +51,11 @@ function Signup() {
       if (!response.ok) {
         throw new Error("Signup failed");
       }
-      alert("Signup Success!"); // TESTING Output message on successful signup
-      navigate("/login");
 
-      // Handle successful signup (needs to redirect to login page)
+      alert("Signup Success!");
+
+      // redirect to login page
+      navigate("/login");
     } catch (error) {
       setErrorMessage(error.message);
     }

@@ -72,7 +72,6 @@ const faqs = [
     answer:
       "We prioritize your privacy and security. Your data is securely stored and is not accessible to unauthorized users.",
   },
-  // Add more FAQs as needed
 ];
 
 const FAQ = () => {

@@ -69,7 +69,6 @@ const showTasksByAssignmentType = async (req, res) => {
 
 const createTask = async (req, res) => {
   let {
-    user_id,
     task_name,
     start_date,
     deadline,
@@ -78,6 +77,10 @@ const createTask = async (req, res) => {
     note,
     task_type,
   } = req.body;
+
+  const token = req.header("Authorization").split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user_id = decoded.user_id;
 
   // If deadline is not provided, set it to today's date
   if (!deadline) {

@@ -16,7 +16,7 @@ COPY . .
 # Set any environment variables
 ENV NODE_ENV=production
 
-# Your server's port, change if different
+# Server's port
 EXPOSE 8000
 
 # Command to run the app

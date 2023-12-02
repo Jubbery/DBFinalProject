@@ -26,8 +26,8 @@ const AddTaskModal = ({ isOpen, onRequestClose, taskAdded }) => {
   const [taskName, setTaskName] = useState("");
   const [deadline, setDeadline] = useState("");
   const [note, setNote] = useState("");
-  const [priority, setPriority] = useState("Medium"); // default to Medium
-  const [task_type, setTaskType] = useState("Assignment"); // default to Assignment
+  const [priority, setPriority] = useState("");
+  const [task_type, setTaskType] = useState("");
 
   const handleChange = (event) => {
     switch (event.target.name) {
@@ -53,17 +53,14 @@ const AddTaskModal = ({ isOpen, onRequestClose, taskAdded }) => {
 
   const addTask = async (event) => {
     event.preventDefault();
-
+    const token = localStorage.getItem("token");
     const newTask = {
       task_name: taskName,
       deadline: deadline,
       note: note,
-      user_id: localStorage.getItem("uid"),
       priority: priority,
       task_type: task_type,
     };
-
-    console.log("current user id:", localStorage.getItem("uid")); // TESTING current user id
 
     try {
       const response = await fetch("http://localhost:8000/tasks", {
@@ -71,6 +68,7 @@ const AddTaskModal = ({ isOpen, onRequestClose, taskAdded }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newTask),
       });
