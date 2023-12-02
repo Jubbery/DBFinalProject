@@ -73,7 +73,7 @@ const createTask = async (req, res) => {
     task_name,
     start_date,
     deadline,
-    priority,
+    priority_level,
     status,
     note,
     task_type,
@@ -98,7 +98,7 @@ const createTask = async (req, res) => {
         task_name,
         start_date,
         deadline,
-        priority,
+        priority_level,
         status,
         note,
         task_type,
@@ -113,14 +113,8 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   const { taskId } = req.params;
-  console.log("taskId:", taskId); // TESTING Print taskId to the console
-  const { task_name, deadline, note, priority, task_status, task_type } =
+  const { task_name, deadline, note, priority_level, task_status, task_type } =
     req.body;
-
-  // Print task_status to the console
-  console.log("task_name:", task_name); // TESTING Print task_name to the console
-  console.log("task_status:", task_status); // TESTING Print task_status to the console
-  console.log("priority:", priority); // TESTING Print task_status to the console
 
   // If deadline is not provided, set it to today's date
   if (!deadline) {
@@ -131,7 +125,15 @@ const updateTask = async (req, res) => {
   try {
     const updatedTask = await db.query(
       "UPDATE Tasks SET task_name = $1, deadline = $2, note = $3, priority_level = $4, task_status = $5, task_type = $6 WHERE task_id = $7 RETURNING *",
-      [task_name, deadline, note, priority, task_status, task_type, taskId]
+      [
+        task_name,
+        deadline,
+        note,
+        priority_level,
+        task_status,
+        task_type,
+        taskId,
+      ]
     );
 
     res.json(updatedTask.rows[0]);
