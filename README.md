@@ -78,7 +78,7 @@ The application should now be running on `http://localhost:3000`.
 
 ### Usage
 
-Log in with your Canvas credentials to access your dashboard, then proceed to the Calendar to get the url. You can add tasks, view upcoming events, and manage your courses directly from the dashboard.
+Log into Canvas with your Canvas credentials to access your dashboard, then proceed to the Calendar to get the "Calendar Feed" url. Proceed to Canvas Flow, Sign-up by clicking the Canvas Flow Icon. Once logged in, go to the Calendar tab and enter your Calendar Feed url to add all of you tasks to your Canvas Flow account. You can then add tasks, view upcoming events, and manage your tasks directly from the Assignments dashboard!
 
 ## Documentation
 
