@@ -110,7 +110,7 @@ const mapEventToObject = (eventData) => {
 // Debug canvas data component
 // Left in to demonstrate how canvas calendar data is retrieved
 const Debug = () => {
-  const [canvasURL, setCanvasURL] = useState(null);
+  const [canvasURL, setCanvasURL] = useState("");
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
